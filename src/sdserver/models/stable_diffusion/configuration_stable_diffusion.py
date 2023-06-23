@@ -36,10 +36,9 @@ class StableDiffusionConfig(sdserver.SDConfig):
 
     __config__ = {
         "timeout": 3600000,
-        "trust_remote_code": True,
         "url": "https://github.com/databrickslabs/dolly",
         "default_id": "runwayml/stable-diffusion-v1-5",
-        "model_ids": ["runwayml/stable-diffusion-v1-5",],
+        "model_ids": ["runwayml/stable-diffusion-v1-5"],
     }
 
     return_full_text: bool = sdserver.SDConfig.Field(

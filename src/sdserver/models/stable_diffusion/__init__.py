@@ -20,7 +20,7 @@ import sdserver
 
 
 _import_structure = {
-    "configuration_stable_diffusion": ["StableDiffusionConfig", "START_DOLLY_V2_COMMAND_DOCSTRING",],
+    "configuration_stable_diffusion": ["StableDiffusionConfig", "START_STABLE_DIFFUSION_COMMAND_DOCSTRING",],
 }
 
 try:

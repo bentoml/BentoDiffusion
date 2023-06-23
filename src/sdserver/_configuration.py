@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Configuration utilities for OpenLLM. All model configuration will inherit from ``openllm.LLMConfig``.
+Configuration utilities for SDConfig. All model configuration will inherit from ``sdserver.SDConfig``.
 
-Highlight feature: Each fields in ``openllm.LLMConfig`` will also automatically generate a environment
+Highlight feature: Each fields in ``sdserver.SDConfig`` will also automatically generate a environment
 variable based on its name field.
 
 For example, the following config class:
@@ -102,9 +102,6 @@ if t.TYPE_CHECKING:
     from attr import _make_repr  # type: ignore
     from attr import _transform_attrs  # type: ignore
 
-    import transformers
-    from transformers.generation.beam_constraints import Constraint
-
     from ._types import ClickFunctionWrapper
     from ._types import F
     from ._types import O_co
@@ -163,7 +160,6 @@ class ModelSettings(t.TypedDict, total=False):
     # meta
     url: str
     requires_gpu: bool
-    trust_remote_code: bool
     service_name: NotRequired[str]
     requirements: t.Optional[ListStr]
 
@@ -215,14 +211,10 @@ class _ModelSettingsAttr:
             name_type="dasherize",
             requires_gpu=False,
             url="",
-            use_pipeline=False,
-            model_type="causal_lm",
-            trust_remote_code=False,
             requirements=None,
             timeout=int(36e6),
             service_name="",
             workers_per_resource=1,
-            runtime="transformers",
         )
         return cls(**t.cast(DictStrAny, _))
 
@@ -235,12 +227,6 @@ def structure_settings(cl_: type[SDConfig], cls: type[_ModelSettingsAttr]):
         raise RuntimeError("Given LLMConfig must have '__config__' that is not None defined.")
 
     assert cl_.__config__ is not None
-
-    if "generation_class" in cl_.__config__:
-        raise ValueError(
-            "'generation_class' shouldn't be defined in '__config__', rather defining "
-            f"all required attributes under '{cl_}.GenerationConfig' instead."
-        )
 
     _cl_name = cl_.__name__.replace("Config", "")
 
@@ -264,35 +250,7 @@ def structure_settings(cl_: type[SDConfig], cls: type[_ModelSettingsAttr]):
     env = sdserver.utils.ModelEnv(_final_value_dct["model_name"])
     _final_value_dct["env"] = env
 
-    # bettertransformer support
-    if _settings_attr["bettertransformer"] is None:
-        _final_value_dct["bettertransformer"] = (
-            os.environ.get(env.bettertransformer, str(False)).upper() in ENV_VARS_TRUE_VALUES
-        )
-    if _settings_attr["requires_gpu"]:
-        # if requires_gpu is True, then disable BetterTransformer for quantization.
-        _final_value_dct["bettertransformer"] = False
-
     _final_value_dct["service_name"] = f"generated_{_final_value_dct['model_name']}_service.py"
-    _final_value_dct["generation_class"] = attr.make_class(
-        f"{_cl_name}GenerationConfig",
-        [],
-        bases=(GenerationConfig,),
-        slots=True,
-        weakref_slot=True,
-        frozen=True,
-        repr=True,
-        collect_by_mro=True,
-        field_transformer=_make_env_transformer(
-            cl_,
-            _final_value_dct["model_name"],
-            suffix="generation",
-            default_callback=lambda field_name, field_default: getattr(cl_.GenerationConfig, field_name, field_default)
-            if codegen.has_own_attribute(cl_, "GenerationConfig")
-            else field_default,
-            globs={"cl_": cl_},
-        ),
-    )
 
     return attr.evolve(_settings_attr, **_final_value_dct)
 
@@ -363,11 +321,11 @@ def _setattr_class(attr_name: str, value_var: t.Any, add_dunder: bool = False):
     return f"setattr(cls, '{attr_name}', {val})"
 
 
-_dunder_add = {"generation_class"}
+_dunder_add = {}
 
 
 def _make_assignment_script(
-    cls: type[SDConfig], attributes: attr.AttrsInstance, _prefix: t.LiteralString = "openllm"
+    cls: type[SDConfig], attributes: attr.AttrsInstance, _prefix: t.LiteralString = "sdserver"
 ) -> t.Callable[..., None]:
     """Generate the assignment script with prefix attributes __openllm_<value>__"""
     args: ListStr = []
@@ -391,14 +349,12 @@ def _make_assignment_script(
     )
 
 
-_reserved_namespace = {"__config__", "GenerationConfig"}
+_reserved_namespace = {"__config__"}
 
 
 @dataclass_transform(order_default=True, field_specifiers=(attr.field, dantic.Field))
-def __llm_config_transform__(cls: type[SDConfig]) -> type[SDConfig]:
+def __sd_config_transform__(cls: type[SDConfig]) -> type[SDConfig]:
     kwargs: dict[str, t.Any] = {}
-    if hasattr(cls, "GenerationConfig"):
-        kwargs = {k: v for k, v in vars(cls.GenerationConfig).items() if not k.startswith("_")}
     non_intrusive_setattr(
         cls,
         "__dataclass_transform__",
@@ -545,37 +501,12 @@ class SDConfig:
         __sdserver_requires_gpu__: bool = Field(None, init=False)
         """Determines if this model is only available on GPU. By default it supports GPU and fallback to CPU."""
 
-        __sdserver_trust_remote_code__: bool = Field(False)
-        """Whether to always trust remote code"""
-
         __sdserver_service_name__: str = Field(None)
         """Generated service name for this LLMConfig. By default, it is 'generated_{model_name}_service.py'"""
 
         __sdserver_requirements__: ListStr | None = Field(None)
         """The default PyPI requirements needed to run this given LLM. By default, we will depend on
         bentoml, torch, transformers."""
-
-        __sdserver_use_pipeline__: bool = Field(False)
-        """Whether this LLM will use HuggingFace Pipeline API. By default, this is set to False.
-        The reason for this to be here is because we want to access this object before loading
-        the _bentomodel. This is because we will actually download the model weights when accessing
-        _bentomodel.
-        """
-
-        __sdserver_bettertransformer__: bool = Field(False)
-        """Whether to use BetterTransformer for this given LLM. This depends per model
-        architecture. By default, we will use BetterTransformer for T5 and StableLM models,
-        and set to False for every other models.
-        """
-
-        __sdserver_model_type__: t.Literal["causal_lm", "seq2seq_lm"] = Field("causal_lm")
-        """The model type for this given LLM. By default, it should be causal language modeling.
-        Currently supported 'causal_lm' or 'seq2seq_lm'
-        """
-
-        __sdserver_runtime__: t.Literal["transformers", "cpp"] = Field("transformers")
-        """The runtime to use for this model. Possible values are `transformers` or `cpp`. See
-        LlaMA for more information."""
 
         __sdserver_name_type__: t.Literal["dasherize", "lowercase"] = Field("dasherize")
         """the default name typed for this model. "dasherize" will convert the name to lowercase and
@@ -721,14 +652,14 @@ class SDConfig:
             globs: DictStrAny = {"t": t, "typing": t, "Constraint": Constraint}
             if cls.__module__ in sys.modules:
                 globs.update(sys.modules[cls.__module__].__dict__)
-            attr.resolve_types(cls.__sdserver_generation_class__, globalns=globs)
 
             cls = attr.resolve_types(cls, globalns=globs)
+
         # the hint cache for easier access
         cls.__sdserver_hints__ = {
-            f.name: f.type for ite in map(attr.fields, (cls, cls.__sdserver_generation_class__)) for f in ite
+            f.name: f.type for ite in map(attr.fields, (cls, )) for f in ite
         }
-        cls = __llm_config_transform__(cls)
+        cls = __sd_config_transform__(cls)
 
     def __setattr__(self, attr: str, value: t.Any):
         if attr in _reserved_namespace:
@@ -743,22 +674,11 @@ class SDConfig:
     def __init__(
         self,
         *,
-        generation_config: DictStrAny | None = None,
         __sdserver_extras__: DictStrAny | None = None,
         **attrs: t.Any,
     ):
         # create a copy of the keys as cache
         _cached_keys = tuple(attrs.keys())
-
-        _generation_cl_dict = attr.fields_dict(self.__sdserver_generation_class__)
-        if generation_config is None:
-            generation_config = {k: v for k, v in attrs.items() if k in _generation_cl_dict}
-        else:
-            config_merger.merge(generation_config, {k: v for k, v in attrs.items() if k in _generation_cl_dict})
-
-        for k in _cached_keys:
-            if k in generation_config or attrs.get(k) is None:
-                del attrs[k]
         _cached_keys = tuple(k for k in _cached_keys if k in attrs)
 
         self.__sdserver_extras__ = first_not_none(__sdserver_extras__, default={})
@@ -773,19 +693,18 @@ class SDConfig:
 
         if DEBUG:
             logger.info(
-                "Creating %s with the following attributes: %s, generation_config=%s",
+                "Creating %s with the following attributes: %s",
                 self.__class__.__name__,
                 _cached_keys,
-                generation_config,
             )
 
         # The rest of attrs should only be the attributes to be passed to __attrs_init__
-        self.__attrs_init__(generation_config=self["generation_class"](**generation_config), **attrs)
+        self.__attrs_init__(**attrs)
 
     def __getitem__(self, item: str | t.Any) -> t.Any:
         """Allowing access LLMConfig as a dictionary. The order will always evaluate as
 
-        __sdserver_*__ > self.key > __sdserver_generation_class__ > __sdserver_extras__
+        __sdserver_*__ > self.key > __sdserver_extras__
 
         This method is purely for convenience, and should not be used for performance critical code.
         """
@@ -800,8 +719,6 @@ class SDConfig:
             return getattr(self, internal_attributes)
         elif hasattr(self, item):
             return getattr(self, item)
-        elif hasattr(self.__sdserver_generation_class__, item):
-            return getattr(self.generation_config, item)
         elif item in self.__sdserver_extras__:
             return self.__sdserver_extras__[item]
         else:
@@ -859,9 +776,6 @@ class SDConfig:
 
     def model_dump(self, flatten: bool = False, **_: t.Any):
         dumped = bentoml_cattr.unstructure(self)
-        if flatten:
-            generation_config = dumped.pop("generation_config")
-            dumped.update(generation_config)
         return dumped
 
     def model_dump_json(self, **kwargs: t.Any):
@@ -888,47 +802,19 @@ class SDConfig:
 
         env_struct = bentoml_cattr.structure(config_from_env, cls)
 
-        if "generation_config" in attrs:
-            generation_config = attrs.pop("generation_config")
-            if not LazyType(DictStrAny).isinstance(generation_config):
-                raise RuntimeError(f"Expected a dictionary, but got {type(generation_config)}")
-        else:
-            generation_config = {
-                k: v for k, v in attrs.items() if k in attr.fields_dict(env_struct.__sdserver_generation_class__)
-            }
-
-        for k in tuple(attrs.keys()):
-            if k in generation_config:
-                del attrs[k]
-
-        return attr.evolve(env_struct, generation_config=generation_config, **attrs)
+        return attr.evolve(env_struct, **attrs)
 
     def model_validate_click(self, **attrs: t.Any) -> tuple[SDConfig, DictStrAny]:
         """Parse given click attributes into a LLMConfig and return the remaining click attributes."""
-        llm_config_attrs: DictStrAny = {"generation_config": {}}
+        sd_config_attrs: DictStrAny = {}
         key_to_remove: ListStr = []
 
         for k, v in attrs.items():
-            if k.startswith(f"{self['model_name']}_generation_"):
-                llm_config_attrs["generation_config"][k[len(self["model_name"] + "_generation_") :]] = v
-                key_to_remove.append(k)
-            elif k.startswith(f"{self['model_name']}_"):
-                llm_config_attrs[k[len(self["model_name"] + "_") :]] = v
+            if k.startswith(f"{self['model_name']}_"):
+                sd_config_attrs[k[len(self["model_name"] + "_") :]] = v
                 key_to_remove.append(k)
 
-        return self.model_construct_env(**llm_config_attrs), {k: v for k, v in attrs.items() if k not in key_to_remove}
-
-    @t.overload
-    def to_generation_config(self, return_as_dict: t.Literal[False] = ...) -> transformers.GenerationConfig:
-        ...
-
-    @t.overload
-    def to_generation_config(self, return_as_dict: t.Literal[True] = ...) -> DictStrAny:
-        ...
-
-    def to_generation_config(self, return_as_dict: bool = False) -> transformers.GenerationConfig | DictStrAny:
-        config = transformers.GenerationConfig(**bentoml_cattr.unstructure(self.generation_config))
-        return config.to_dict() if return_as_dict else config
+        return self.model_construct_env(**sd_config_attrs), {k: v for k, v in attrs.items() if k not in key_to_remove}
 
     @classmethod
     @t.overload
@@ -949,26 +835,9 @@ class SDConfig:
         Note that the identifier for all LLMConfig will be prefixed with '<model_name>_*', and the generation config
         will be prefixed with '<model_name>_generation_*'.
         """
-        for name, field in attr.fields_dict(cls.__sdserver_generation_class__).items():
-            ty = cls.__sdserver_hints__.get(name)
-            if t.get_origin(ty) is t.Union:
-                # NOTE: Union type is currently not yet supported, we probably just need to use environment instead.
-                continue
-            f = dantic.attrs_to_options(name, field, cls.__sdserver_model_name__, typ=ty, suffix_generation=True)(f)
-        f = cog.optgroup.group(f"{cls.__sdserver_generation_class__.__name__} generation options")(f)
 
-        if len(cls.__sdserver_accepted_keys__.difference(set(attr.fields_dict(cls.__sdserver_generation_class__)))) == 0:
-            # NOTE: in this case, the function is already a ClickFunctionWrapper
-            # hence the casting
-            return f
-
-        # We pop out 'generation_config' as it is a attribute that we don't
-        # need to expose to CLI.
         for name, field in attr.fields_dict(cls).items():
             ty = cls.__sdserver_hints__.get(name)
-            if t.get_origin(ty) is t.Union or name == "generation_config":
-                # NOTE: Union type is currently not yet supported, we probably just need to use environment instead.
-                continue
             f = dantic.attrs_to_options(name, field, cls.__sdserver_model_name__, typ=ty)(f)
 
         return cog.optgroup.group(f"{cls.__name__} options")(f)

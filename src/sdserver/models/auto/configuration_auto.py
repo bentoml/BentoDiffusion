@@ -60,9 +60,6 @@ class _LazyConfigMapping(ConfigOrderedDict):
         module_name = inflection.underscore(key)
         if module_name not in self._modules:
             self._modules[module_name] = sdserver.utils.ModelEnv(module_name).module
-        print("kaka", key, self._mapping)
-        print("wuwu", module_name, value)
-        print("waaa", self._modules.keys())
         if hasattr(self._modules[module_name], value):
             return getattr(self._modules[module_name], value)
 

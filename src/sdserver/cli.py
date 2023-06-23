@@ -503,7 +503,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
     command_attrs["aliases"] = aliases if len(aliases) > 0 else None
 
     serve_decorator = _http_server_args if not _serve_grpc else _grpc_server_args
-    group = start_cli if not _serve_grpc else start_grpc_cli
+    group = start_cli
 
     available_gpu = gpu_count()
     if sd_config["requires_gpu"] and len(available_gpu) < 1:
