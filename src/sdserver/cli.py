@@ -690,8 +690,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
 
         server_cls = getattr(bentoml, "HTTPServer")
         server_attrs["timeout"] = server_timeout
-        service_ident = server_attrs["working_dir"] + "/_service.py:svc"
-        server = server_cls(service_ident, **server_attrs)
+        server = server_cls("service.py:svc", **server_attrs)
 
         def next_step(model_name: str) -> None:
             _echo(

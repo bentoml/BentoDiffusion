@@ -56,6 +56,7 @@ dependencies = [
     "orjson",
     "inflection",
     "huggingface_hub",
+    "pydantic",
     # tabulate for CLI with CJK support
     # >=0.9.0 for some bug fixes
     "tabulate[widechars]>=0.9.0",
