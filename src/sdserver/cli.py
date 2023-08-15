@@ -236,7 +236,7 @@ def workers_per_resource_option(factory: t.Any, build: bool = False):
         help_str += """\n
     NOTE: The workers value passed into 'build' will determine how the LLM can
     be provisioned in Kubernetes as well as in standalone container. This will
-    ensure it has the same effect with 'openllm start --workers ...'"""
+    ensure it has the same effect with 'onediffusion start --workers ...'"""
     return factory.option(
         "--workers-per-resource",
         default=None,
@@ -350,7 +350,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
             try:
                 return _cached_http[cmd_name]
             except KeyError:
-                raise click.BadArgumentUsage(f"{cmd_name} is not a valid model identifier supported by OpenLLM.")
+                raise click.BadArgumentUsage(f"{cmd_name} is not a valid model identifier supported by OneDiffusion.")
         elif ctx.command.name == "start-grpc":
             raise NotImplemented
         return super().get_command(ctx, cmd_name)
@@ -420,19 +420,19 @@ def cli():
 |____/|____/  |____/ \___|_|    \_/ \___|_|
 
     \b
-    An open platform for operating large language models in production.
-    Fine-tune, serve, deploy, and monitor any LLMs with ease.
+    An open platform for operating diffusion models in production.
+    Fine-tune, serve, deploy, and monitor any diffusion models with ease.
     """
 
 
 @cli.group(cls=SDServerCommandGroup, context_settings=_CONTEXT_SETTINGS, name="start")
 def start_cli():
     """
-    Start any LLM as a REST server.
+    Start any diffusion models as a REST server.
 
     \b
     ```bash
-    $ openllm start <model_name> --<options> ...
+    $ onediffusion start <model_name> --<options> ...
     ```
     """
 
@@ -654,7 +654,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
 
         if fast and not get_quiet_mode():
             _echo(
-                f"Make sure to download the model before 'start': 'openllm download {model_name}{'--model-id ' + model_id if model_id else ''}'",
+                f"Make sure to download the model before 'start': 'onediffusion download {model_name}{'--model-id ' + model_id if model_id else ''}'",
                 fg="yellow",
             )
         automodel_attrs = {
