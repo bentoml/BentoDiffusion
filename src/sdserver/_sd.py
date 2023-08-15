@@ -428,35 +428,14 @@ class SD(SDInterface, t.Generic[_M, _T]):
 
     #     return bentoml.Tag.from_taglike(f"{implementation}-{name}:{model_version}")
 
-    def ensure_model_id_exists(self) -> bentoml.Model:
-        """This utility function will download the model if it doesn't exist yet.
-        Make sure to call this function if 'ensure_available' is not set during
-        Auto LLM initialisation.
-        """
-        return bentoml.diffusers.get("pt-sdxl-stabilityai--stable-diffusion-xl-base-1.0:bf714989e22c57ddc1c453bf74dab4521acb81d8")
-        output = subprocess.check_output(
-            [
-                sys.executable,
-                "-m",
-                "openllm",
-                "download",
-                self.config["start_name"],
-                "--model-id",
-                self.model_id,
-                "--output",
-                "porcelain",
-            ]
-        )
-        if DEBUG or get_debug_mode():
-            # NOTE: This usually only concern BentoML devs.
-            pattern = r"^__tag__:[^:\n]+:[^:\n]+"
-            matched = re.search(pattern, output.decode("utf-8").strip(), re.MULTILINE)
-            assert matched is not None, f"Failed to find tag from output: {output}"
-            _, _, tag = matched.group(0).partition(":")
-        else:
-            tag = output.strip().decode()
+    # def ensure_model_id_exists(self) -> bentoml.Model:
+    #     """This utility function will download the model if it doesn't exist yet.
+    #     Make sure to call this function if 'ensure_available' is not set during
+    #     Auto LLM initialisation.
+    #     """
 
-        return bentoml.transformers.get(tag)
+    #     return
+
 
     @property
     def _bentomodel(self) -> bentoml.Model:
