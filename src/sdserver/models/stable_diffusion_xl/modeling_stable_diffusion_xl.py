@@ -29,7 +29,7 @@ else:
 logger = logging.getLogger(__name__)
 
 
-class StableDiffusion(sdserver.SD["transformers.Pipeline", "transformers.PreTrainedTokenizer"]):
+class StableDiffusionXL(sdserver.SD["transformers.Pipeline", "transformers.PreTrainedTokenizer"]):
     __sdserver_internal__ = True
 
     @property

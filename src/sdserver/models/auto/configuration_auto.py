@@ -41,6 +41,7 @@ else:
 CONFIG_MAPPING_NAMES = OrderedDict(
     [
         ("stable_diffusion", "StableDiffusionConfig"),
+        ("stable_diffusion_xl", "StableDiffusionXLConfig"),
     ]
 )
 
@@ -96,7 +97,8 @@ CONFIG_MAPPING: dict[str, type[sdserver.SDConfig]] = _LazyConfigMapping(CONFIG_M
 # The below handle special alias when we call underscore to the name directly
 # without processing camelcase first.
 CONFIG_NAME_ALIASES: dict[str, str] = {
-    "stable_diffusion": "stablediffusion",
+    #"stable_diffusion": "stablediffusion",
+    #"stable_diffusion_xl": "stablediffusionxl",
 }
 
 
@@ -119,6 +121,7 @@ class AutoConfig:
         model_name = inflection.underscore(name)
         if model_name in CONFIG_NAME_ALIASES:
             model_name = CONFIG_NAME_ALIASES[model_name]
+
         if model_name in CONFIG_MAPPING:
             return CONFIG_MAPPING[model_name]
         raise ValueError(

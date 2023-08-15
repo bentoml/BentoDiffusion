@@ -43,6 +43,7 @@ if utils.DEBUG:
 
 _import_structure = {
     # "_llm": ["LLM", "Runner", "LLMRunner"],
+    "_sd": ["SD"],
     "_configuration": ["SDConfig"],
     #"_package": ["build"],
     "exceptions": [],
@@ -55,20 +56,25 @@ _import_structure = {
         "AutoConfig",
         "CONFIG_MAPPING",
         "MODEL_MAPPING_NAMES",
-    #     "MODEL_FLAX_MAPPING_NAMES",
-    #     "MODEL_TF_MAPPING_NAMES",
+        # for flax support later
+        # "MODEL_FLAX_MAPPING_NAMES",
     ],
-    # "models.flan_t5": ["FlanT5Config"],
-    # "models.dolly_v2": ["DollyV2Config"],
-    # "models.falcon": ["FalconConfig"],
-    # "models.chatglm": ["ChatGLMConfig"],
-    # "models.starcoder": ["StarCoderConfig"],
-    # "models.stablelm": ["StableLMConfig"],
-    # "models.opt": ["OPTConfig"],
+    "models.stable_diffusion": ["StableDiffusionConfig"],
 }
 
+try:
+    if not utils.is_torch_available():
+        raise MissingDependencyError
+except MissingDependencyError:
+    from .utils import dummy_pt_objects
 
-# declaration for OpenLLM-related modules
+    _import_structure["utils.dummy_pt_objects"] = [name for name in dir(dummy_pt_objects) if not name.startswith("_")]
+else:
+    # _import_structure["models.stable_diffusion"].extend(["StableDiffusion"])
+    _import_structure["models.auto"].extend(["AutoSD", "MODEL_MAPPING"])
+
+
+# declaration for OneDiffusion-related modules
 if t.TYPE_CHECKING:
     from . import cli as cli
     # from . import client as client
@@ -77,14 +83,8 @@ if t.TYPE_CHECKING:
 
     # Specific types import
     from ._configuration import SDConfig as SDConfig
-    #from ._llm import LLMRunner as LLMRunner
-    #from ._llm import Runner as Runner
-    #from .cli import start as start
     from .models.auto import CONFIG_MAPPING as CONFIG_MAPPING
-    # from .models.auto import MODEL_FLAX_MAPPING_NAMES as MODEL_FLAX_MAPPING_NAMES
-    # from .models.auto import MODEL_MAPPING_NAMES as MODEL_MAPPING_NAMES
-    # from .models.auto import AutoConfig as AutoConfig
-    # from .models.stable_diffusion import StableDiffusionConfig as StableDiffusionConfig
+    from .models.auto import AutoConfig as AutoConfig
 
     try:
         if not utils.is_torch_available():
@@ -93,7 +93,7 @@ if t.TYPE_CHECKING:
         from .utils.dummy_pt_objects import *
     else:
         from .models.auto import MODEL_MAPPING as MODEL_MAPPING
-        from .models.auto import AutoLLM as AutoLLM
+        from .models.auto import AutoSD as AutoSD
 
 else:
     import sys
@@ -105,5 +105,11 @@ else:
         module_spec=__spec__,
         extra_objects={
             "__version__": __version__,
+            # The below is a special mapping that allows sdserver to
+            # be used as a dictionary.  This is purely for convenience
+            # sake, and should not be used in performance critcal
+            # code. This is also not considered as a public API.
+
+            "__sdserver_special__": {"pt": "AutoSD"},
         },
     )

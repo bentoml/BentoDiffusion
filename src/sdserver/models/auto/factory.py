@@ -60,6 +60,7 @@ class _BaseAutoSDClass:
         cls,
         model_name: str,
         model_id: str | None = None,
+        pipeline: str | None = None,
         return_runner_kwargs: t.Literal[False] = ...,
         sd_config: sdserver.SDConfig | None = ...,
         ensure_available: t.Literal[False, True] = ...,
@@ -73,8 +74,9 @@ class _BaseAutoSDClass:
         cls,
         model_name: str,
         model_id: str | None = None,
+        pipeline: str | None = None,
         return_runner_kwargs: t.Literal[True] = ...,
-        sd_config: sdserver.LLMConfig | None = ...,
+        sd_config: sdserver.SDConfig | None = ...,
         ensure_available: t.Literal[False, True] = ...,
         **attrs: t.Any,
     ) -> tuple[sdserver.SD[t.Any, t.Any], dict[str, t.Any]]:
@@ -85,11 +87,12 @@ class _BaseAutoSDClass:
         cls,
         model_name: str,
         model_id: str | None = None,
+        pipeline: str | None = None,
         return_runner_kwargs: bool = False,
         sd_config: sdserver.SDConfig | None = None,
         ensure_available: bool = False,
         **attrs: t.Any,
-    ) -> openllm.LLM[t.Any, t.Any] | tuple[openllm.LLM[t.Any, t.Any], dict[str, t.Any]]:
+    ) -> sdserver.SD[t.Any, t.Any] | tuple[openllm.LLM[t.Any, t.Any], dict[str, t.Any]]:
         """The lower level API for creating a LLM instance.
 
         ```python
@@ -108,46 +111,32 @@ class _BaseAutoSDClass:
         to_runner_attrs = {k: v for k, v in attrs.items() if k in runner_kwargs_name}
         attrs = {k: v for k, v in attrs.items() if k not in to_runner_attrs}
         if cls._model_mapping.get(inflection.underscore(model_name), None, mapping_type="name2model"):
-            if not isinstance(llm_config, openllm.LLMConfig):
+            if not isinstance(sd_config, sdserver.SDConfig):
                 # The rest of kwargs is now passed to config
-                llm_config = AutoConfig.for_model(model_name, **attrs)
-                attrs = llm_config.__openllm_extras__
+                sd_config = AutoConfig.for_model(model_name, **attrs)
+                attrs = sd_config.__sdserver_extras__
             # the rest of attrs will be saved to __openllm_extras__
-            llm = cls._model_mapping[type(llm_config)].from_pretrained(
+            sd = cls._model_mapping[type(sd_config)].from_pretrained(
                 model_id,
-                llm_config=llm_config,
-                **llm_config.__openllm_extras__,
+                pipeline,
+                sd_config=sd_config,
+                **sd_config.__sdserver_extras__,
             )
             if ensure_available:
                 logger.debug(
                     "'ensure_available=True', Downloading '%s' with 'model_id=%s' to local model store.",
                     model_name,
-                    llm.model_id,
+                    sd.model_id,
                 )
-                llm.ensure_model_id_exists()
+                sd.ensure_model_id_exists()
             if not return_runner_kwargs:
-                return llm
-            return llm, to_runner_attrs
+                return sd
+            return sd, to_runner_attrs
         raise ValueError(
-            f"Unrecognized configuration class {llm_config.__class__} for this kind of AutoLLM: {cls.__name__}.\n"
+            f"Unrecognized configuration class {sd_config.__class__} for this kind of AutoLLM: {cls.__name__}.\n"
             f"LLM type should be one of {', '.join(c.__name__ for c in cls._model_mapping.keys())}."
         )
 
-    @classmethod
-    def create_runner(cls, model_name: str, model_id: str | None = None, **attrs: t.Any) -> LLMRunner:
-        """
-        Create a LLM Runner for the given model name.
-
-        Args:
-            model_name: The model name to instantiate.
-            model_id: The pretrained model name to instantiate.
-            **attrs: Additional keyword arguments passed along to the specific configuration class.
-
-        Returns:
-            A LLM instance.
-        """
-        llm, runner_attrs = cls.for_model(model_name, model_id, return_runner_kwargs=True, **attrs)
-        return llm.to_runner(**runner_attrs)
 
     @classmethod
     def register(cls, config_class: type[openllm.LLMConfig], llm_class: type[openllm.LLM[t.Any, t.Any]]):
@@ -176,15 +165,15 @@ def getattribute_from_module(module: types.ModuleType, attr: t.Any) -> t.Any:
         return getattr(module, attr)
     # Some of the mappings have entries model_type -> object of another model type. In that case we try to grab the
     # object at the top level.
-    openllm_module = importlib.import_module("openllm")
+    sdserver_module = importlib.import_module("sdserver")
 
-    if module != openllm_module:
+    if module != sdserver_module:
         try:
-            return getattribute_from_module(openllm_module, attr)
+            return getattribute_from_module(sdserver_module, attr)
         except ValueError:
-            raise ValueError(f"Could not find {attr} neither in {module} nor in {openllm_module}!")
+            raise ValueError(f"Could not find {attr} neither in {module} nor in {sdserver_module}!")
     else:
-        raise ValueError(f"Could not find {attr} in {openllm_module}!")
+        raise ValueError(f"Could not find {attr} in {sdserver_module}!")
 
 
 class _LazyAutoMapping(ConfigModelOrderedDict):
@@ -204,7 +193,7 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
         common_keys = set(self._config_mapping.keys()).intersection(self._model_mapping.keys())
         return len(common_keys) + len(self._extra_content)
 
-    def __getitem__(self, key: type[openllm.LLMConfig]) -> type[openllm.LLM[t.Any, t.Any]]:
+    def __getitem__(self, key: type[sdserver.SDConfig]) -> type[sdserver.SD[t.Any, t.Any]]:
         if key in self._extra_content:
             return self._extra_content[key]
         model_type = self._reverse_config_mapping[key.__name__]
@@ -223,7 +212,7 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
     def _load_attr_from_module(self, model_type: str, attr: str) -> t.Any:
         module_name = inflection.underscore(model_type)
         if module_name not in self._modules:
-            self._modules[module_name] = importlib.import_module(f".{module_name}", "openllm.models")
+            self._modules[module_name] = importlib.import_module(f".{module_name}", "sdserver.models")
         return getattribute_from_module(self._modules[module_name], attr)
 
     def keys(self):

@@ -18,30 +18,24 @@ import typing as t
 from collections import OrderedDict
 
 from .configuration_auto import CONFIG_MAPPING_NAMES
-from .factory import _BaseAutoLLMClass
+from .factory import _BaseAutoSDClass
 from .factory import _LazyAutoMapping
 
 
 if t.TYPE_CHECKING:
-    import openllm
-    import transformers
+    import sdserver
 
 MODEL_MAPPING_NAMES = OrderedDict(
     [
-        ("flan_t5", "FlanT5"),
-        ("dolly_v2", "DollyV2"),
-        ("chatglm", "ChatGLM"),
-        ("starcoder", "StarCoder"),
-        ("falcon", "Falcon"),
-        ("stablelm", "StableLM"),
-        ("opt", "OPT"),
+        ("stable_diffusion", "StableDiffusion"),
+        ("stable_diffusion_xl", "StableDiffusionXL"),
     ]
 )
 
 MODEL_MAPPING: dict[
-    type[openllm.LLMConfig], type[openllm.LLM[transformers.PreTrainedModel, transformers.PreTrainedTokenizerFast]]
+    type[sdserver.SDConfig], type[sdserver.LLM[transformers.PreTrainedModel, transformers.PreTrainedTokenizerFast]]
 ] = _LazyAutoMapping(CONFIG_MAPPING_NAMES, MODEL_MAPPING_NAMES)
 
 
-class AutoLLM(_BaseAutoLLMClass):
+class AutoSD(_BaseAutoSDClass):
     _model_mapping = MODEL_MAPPING

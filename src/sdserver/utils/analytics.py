@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Telemetry related for OpenLLM tracking.
+Telemetry related for SDServer tracking.
 
-Users can disable this with OPENLLM_DO_NOT_TRACK envvar.
+Users can disable this with SDSERVER_DO_NOT_TRACK envvar.
 """
 from __future__ import annotations
 
@@ -38,9 +38,9 @@ from ..__about__ import __version__
 ENV_VARS_TRUE_VALUES = {"1", "ON", "YES", "TRUE"}
 
 # This variable is a proxy that will control BENTOML_DO_NOT_TRACK
-OPENLLM_DO_NOT_TRACK = "OPENLLM_DO_NOT_TRACK"
+SDSERVER_DO_NOT_TRACK = "SDSERVER_DO_NOT_TRACK"
 
-DO_NOT_TRACK = os.environ.get(OPENLLM_DO_NOT_TRACK, str(False)).upper()
+DO_NOT_TRACK = os.environ.get(SDSERVER_DO_NOT_TRACK, str(False)).upper()
 
 
 @functools.lru_cache(maxsize=1)

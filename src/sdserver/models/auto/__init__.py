@@ -34,7 +34,7 @@ try:
 except sdserver.exceptions.MissingDependencyError:
     pass
 else:
-    _import_structure["modeling_auto"].extend(["AutoLLM", "MODEL_MAPPING"])
+    _import_structure["modeling_auto"].extend(["AutoSD", "MODEL_MAPPING"])
 
 
 if t.TYPE_CHECKING:
@@ -52,7 +52,7 @@ if t.TYPE_CHECKING:
         pass
     else:
         from .modeling_auto import MODEL_MAPPING as MODEL_MAPPING
-        from .modeling_auto import AutoLLM as AutoLLM
+        from .modeling_auto import AutoSD as AutoSD
 
 else:
     import sys

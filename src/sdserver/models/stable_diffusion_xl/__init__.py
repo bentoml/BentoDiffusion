@@ -20,7 +20,7 @@ import sdserver
 
 
 _import_structure = {
-    "configuration_stable_diffusion": ["StableDiffusionConfig", "START_STABLE_DIFFUSION_COMMAND_DOCSTRING",],
+    "configuration_stable_diffusion_xl": ["StableDiffusionXLConfig", "START_STABLE_DIFFUSION_XL_COMMAND_DOCSTRING",],
 }
 
 try:
@@ -29,12 +29,12 @@ try:
 except sdserver.exceptions.MissingDependencyError:
     pass
 else:
-    _import_structure["modeling_stable_diffusion"] = ["StableDiffusion"]
+    _import_structure["modeling_stable_diffusion_xl"] = ["StableDiffusionXL"]
     pass
 
 if t.TYPE_CHECKING:
-    from .configuration_stable_diffusion import START_STABLE_DIFFUSION_COMMAND_DOCSTRING as START_STABLE_DIFFUSION_COMMAND_DOCSTRING
-    from .configuration_stable_diffusion import StableDiffusionConfig as StableDiffusionConfig
+    from .configuration_stable_diffusion import START_STABLE_DIFFUSION_XL_COMMAND_DOCSTRING as START_STABLE_DIFFUSION_XL_COMMAND_DOCSTRING
+    from .configuration_stable_diffusion import StableDiffusionXLConfig as StableDiffusionXLConfig
 
     try:
         if not sdserver.utils.is_torch_available():
@@ -42,7 +42,6 @@ if t.TYPE_CHECKING:
     except sdserver.exceptions.MissingDependencyError:
         pass
     else:
-        #from .modeling_dolly_v2 import DollyV2 as DollyV2
         pass
 else:
     import sys

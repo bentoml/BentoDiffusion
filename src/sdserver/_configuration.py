@@ -20,7 +20,7 @@ variable based on its name field.
 For example, the following config class:
 
 ```python
-class FlanT5Config(openllm.LLMConfig):
+class FlanT5Config(sdserver.SDConfig):
     __config__ = {
         "url": "https://huggingface.co/docs/transformers/model_doc/flan-t5",
         "default_id": "google/flan-t5-large",
@@ -41,10 +41,10 @@ class FlanT5Config(openllm.LLMConfig):
         repetition_penalty = 1.0
 ```
 
-which generates the environment OPENLLM_FLAN_T5_GENERATION_TEMPERATURE for users to configure temperature
+which generates the environment ONEDIFFUSION_FLAN_T5_GENERATION_TEMPERATURE for users to configure temperature
 dynamically during serve, ahead-of-serve or per requests.
 
-Refer to ``openllm.LLMConfig`` docstring for more information.
+Refer to ``sdserver.SDConfig`` docstring for more information.
 """
 from __future__ import annotations
 
@@ -119,7 +119,7 @@ else:
     DictStrAny = dict
     ItemgetterAny = itemgetter
     # NOTE: Using internal API from attr here, since we are actually
-    # allowing subclass of openllm.LLMConfig to become 'attrs'-ish
+    # allowing subclass of sdserver.SDConfig to become 'attrs'-ish
     from attr._make import _CountingAttr
     from attr._make import _make_init
     from attr._make import _make_repr
@@ -141,7 +141,7 @@ config_merger = Merger(
 
 
 def _field_env_key(model_name: str, key: str, suffix: str | t.Literal[""] | None = None) -> str:
-    return "_".join(filter(None, map(str.upper, ["SDSERVER", model_name, suffix.strip("_") if suffix else "", key])))
+    return "_".join(filter(None, map(str.upper, ["ONEDIFFUSION", model_name, suffix.strip("_") if suffix else "", key])))
 
 
 # cached it here to save one lookup per assignment
@@ -149,13 +149,15 @@ _object_getattribute = object.__getattribute__
 
 
 class ModelSettings(t.TypedDict, total=False):
-    """ModelSettings serve only for typing purposes as this is transcribed into LLMConfig.__config__.
-    Note that all fields from this dictionary will then be converted to __openllm_*__ fields in LLMConfig.
+    """ModelSettings serve only for typing purposes as this is transcribed into SDConfig.__config__.
+    Note that all fields from this dictionary will then be converted to __sdserver_*__ fields in SDConfig.
     """
 
     # NOTE: These required fields should be at the top, as it will be kw_only
     default_id: Required[str]
     model_ids: Required[ListStr]
+    default_pipeline: Required[str]
+    pipelines: Required[ListStr]
 
     # meta
     url: str
@@ -208,6 +210,8 @@ class _ModelSettingsAttr:
         _ = ModelSettings(
             default_id="__default__",
             model_ids=["__default__"],
+            default_pipeline="__default__",
+            pipelines=["__default__"],
             name_type="dasherize",
             requires_gpu=False,
             url="",
@@ -221,10 +225,10 @@ class _ModelSettingsAttr:
 
 def structure_settings(cl_: type[SDConfig], cls: type[_ModelSettingsAttr]):
     if not lenient_issubclass(cl_, SDConfig):
-        raise RuntimeError(f"Given '{cl_}' must be a subclass type of 'LLMConfig', got '{cl_}' instead.")
+        raise RuntimeError(f"Given '{cl_}' must be a subclass type of 'SDConfig', got '{cl_}' instead.")
 
     if not hasattr(cl_, "__config__") or getattr(cl_, "__config__") is None:
-        raise RuntimeError("Given LLMConfig must have '__config__' that is not None defined.")
+        raise RuntimeError("Given SDConfig must have '__config__' that is not None defined.")
 
     assert cl_.__config__ is not None
 
@@ -234,7 +238,7 @@ def structure_settings(cl_: type[SDConfig], cls: type[_ModelSettingsAttr]):
     try:
         cls(**t.cast(DictStrAny, cl_.__config__))
         _settings_attr = attr.evolve(_settings_attr, **t.cast(DictStrAny, cl_.__config__))
-    except TypeError:
+    except TypeError as e:
         raise ValueError("Either 'default_id' or 'model_ids' are emptied under '__config__' (required fields).")
 
     _final_value_dct: DictStrAny = {
@@ -303,7 +307,7 @@ def _make_env_transformer(
         lines,
         args=("_", "fields"),
         globs=globs,
-        annotations={"_": "type[LLMConfig]", "fields": fields_ann, "return": fields_ann},
+        annotations={"_": "type[SDConfig]", "fields": fields_ann, "return": fields_ann},
     )
 
 
@@ -327,7 +331,7 @@ _dunder_add = {}
 def _make_assignment_script(
     cls: type[SDConfig], attributes: attr.AttrsInstance, _prefix: t.LiteralString = "sdserver"
 ) -> t.Callable[..., None]:
-    """Generate the assignment script with prefix attributes __openllm_<value>__"""
+    """Generate the assignment script with prefix attributes __sdserver_<value>__"""
     args: ListStr = []
     globs: DictStrAny = {
         "cls": cls,
@@ -370,26 +374,26 @@ def __sd_config_transform__(cls: type[SDConfig]) -> type[SDConfig]:
 @attr.define(slots=True)
 class SDConfig:
     """
-    ``openllm.LLMConfig`` is somewhat a hybrid combination between the performance of `attrs` with the
+    ``sdserver.SDConfig`` is somewhat a hybrid combination between the performance of `attrs` with the
     easy-to-use interface that pydantic offer. It lives in between where it allows users to quickly formulate
-    a LLMConfig for any LLM without worrying too much about performance. It does a few things:
+    a SDConfig for any LLM without worrying too much about performance. It does a few things:
 
     - Automatic environment conversion: Each fields will automatically be provisioned with an environment
         variable, make it easy to work with ahead-of-time or during serving time
     - Familiar API: It is compatible with cattrs as well as providing a few Pydantic-2 like API,
         i.e: ``model_construct_env``, ``to_generation_config``, ``to_click_options``
     - Automatic CLI generation: It can identify each fields and convert it to compatible Click options.
-        This means developers can use any of the LLMConfig to create CLI with compatible-Python
+        This means developers can use any of the SDConfig to create CLI with compatible-Python
         CLI library (click, typer, ...)
 
-    > Internally, LLMConfig is an attrs class. All subclass of LLMConfig contains "attrs-like" features,
-    > which means LLMConfig will actually generate subclass to have attrs-compatible API, so that the subclass
+    > Internally, SDConfig is an attrs class. All subclass of SDConfig contains "attrs-like" features,
+    > which means SDConfig will actually generate subclass to have attrs-compatible API, so that the subclass
     > can be written as any normal Python class.
 
     To directly configure GenerationConfig for any given LLM, create a GenerationConfig under the subclass:
 
     ```python
-    class FlanT5Config(openllm.LLMConfig):
+    class FlanT5Config(sdserver.SDConfig):
         class GenerationConfig:
             temperature: float = 0.75
             max_new_tokens: int = 3000
@@ -397,15 +401,15 @@ class SDConfig:
             top_p: float = 0.4
             repetition_penalty = 1.0
     ```
-    By doing so, openllm.LLMConfig will create a compatible GenerationConfig attrs class that can be converted
-    to ``transformers.GenerationConfig``. These attribute can be accessed via ``LLMConfig.generation_config``.
+    By doing so, sdserver.SDConfig will create a compatible GenerationConfig attrs class that can be converted
+    to ``transformers.GenerationConfig``. These attribute can be accessed via ``SDConfig.generation_config``.
 
-    By default, all LLMConfig must provide a __config__ with 'default_id' and 'model_ids'.
+    By default, all SDConfig must provide a __config__ with 'default_id' and 'model_ids'.
 
     All other fields are optional, and will be use default value if not set.
 
     ```python
-    class FalconConfig(openllm.LLMConfig):
+    class FalconConfig(sdserver.SDConfig):
         __config__ = {
             "name_type": "lowercase",
             "trust_remote_code": True,
@@ -430,9 +434,9 @@ class SDConfig:
     attrs.fields with pydantic-compatible interface. For example:
 
     ```python
-    class MyModelConfig(openllm.LLMConfig):
+    class MyModelConfig(sdserver.SDConfig):
 
-        field1 = openllm.LLMConfig.Field(...)
+        field1 = sdserver.SDConfig.Field(...)
     ```
     """
 
@@ -441,13 +445,13 @@ class SDConfig:
         # NOTE: public attributes to override
         __config__: ModelSettings | None = Field(None)
         """Internal configuration for this LLM model. Each of the field in here will be populated
-        and prefixed with __openllm_<value>__"""
+        and prefixed with __sdserver_<value>__"""
 
-        """Users can override this subclass of any given LLMConfig to provide GenerationConfig
+        """Users can override this subclass of any given SDConfig to provide GenerationConfig
         default value. For example:
 
         ```python
-        class MyAwesomeModelConfig(openllm.LLMConfig):
+        class MyAwesomeModelConfig(sdserver.SDConfig):
             class GenerationConfig:
                 max_new_tokens: int = 200
                 top_k: int = 10
@@ -456,30 +460,30 @@ class SDConfig:
         ```
         """
 
-        # NOTE: Internal attributes that should only be used by OpenLLM. Users usually shouldn't
+        # NOTE: Internal attributes that should only be used by Sdserver. Users usually shouldn't
         # concern any of these. These are here for pyright not to complain.
         def __attrs_init__(self, **attrs: t.Any):
-            """Generated __attrs_init__ for LLMConfig subclass that follows the attrs contract."""
+            """Generated __attrs_init__ for SDConfig subclass that follows the attrs contract."""
 
         __attrs_attrs__: tuple[attr.Attribute[t.Any], ...] = Field(None, init=False)
         """Since we are writing our own __init_subclass__, which is an alternative way for __prepare__,
-        we want openllm.LLMConfig to be attrs-like dataclass that has pydantic-like interface.
+        we want sdserver.SDConfig to be attrs-like dataclass that has pydantic-like interface.
         __attrs_attrs__ will be handled dynamically by __init_subclass__.
         """
 
         __sdserver_hints__: DictStrAny = Field(None, init=False)
-        """An internal cache of resolved types for this LLMConfig."""
+        """An internal cache of resolved types for this SDConfig."""
 
         __sdserver_accepted_keys__: set[str] = Field(None, init=False)
-        """The accepted keys for this LLMConfig."""
+        """The accepted keys for this SDConfig."""
 
         __sdserver_extras__: DictStrAny = Field(None, init=False)
-        """Extra metadata for this LLMConfig."""
+        """Extra metadata for this SDConfig."""
 
         # NOTE: The following will be populated from __config__ and also
         # considered to be public API.
         __sdserver_default_id__: str = Field(None)
-        """Return the default model to use when using 'openllm start <model_id>'.
+        """Return the default model to use when using 'sdserver start <model_id>'.
         This could be one of the keys in 'self.model_ids' or custom users model.
 
         This field is required when defining under '__config__'.
@@ -495,14 +499,24 @@ class SDConfig:
         This field is required when defining under '__config__'.
         """
 
+        __sdserver_default_pipeline__: str = Field(None)
+        """Return the default pipeline to use when using 'sdserver start <model_id>'.
+
+        This field is required when defining under '__config__'.
+        """
+
+        __sdserver_pipelines__: ListStr = Field(None)
+        """A list of supported pipelines for this given runnable.
+        """
+
         __sdserver_url__: str = Field(None, init=False)
-        """The resolved url for this LLMConfig."""
+        """The resolved url for this SDConfig."""
 
         __sdserver_requires_gpu__: bool = Field(None, init=False)
         """Determines if this model is only available on GPU. By default it supports GPU and fallback to CPU."""
 
         __sdserver_service_name__: str = Field(None)
-        """Generated service name for this LLMConfig. By default, it is 'generated_{model_name}_service.py'"""
+        """Generated service name for this SDConfig. By default, it is 'generated_{model_name}_service.py'"""
 
         __sdserver_requirements__: ListStr | None = Field(None)
         """The default PyPI requirements needed to run this given LLM. By default, we will depend on
@@ -516,18 +530,18 @@ class SDConfig:
         """The normalized version of __sdserver_start_name__, determined by __sdserver_name_type__"""
 
         __sdserver_start_name__: str = Field(None)
-        """Default name to be used with `openllm start`"""
+        """Default name to be used with `sdserver start`"""
 
         __sdserver_env__: sdserver.utils.ModelEnv = Field(None, init=False)
-        """A ModelEnv instance for this LLMConfig."""
+        """A ModelEnv instance for this SDConfig."""
 
         __sdserver_timeout__: int = Field(36e6)
         """The default timeout to be set for this given LLM."""
 
         __sdserver_workers_per_resource__: int | float = Field(1)
         """The number of workers per resource. This is used to determine the number of workers to use for this model.
-        For example, if this is set to 0.5, then OpenLLM will use 1 worker per 2 resources. If this is set to 1, then
-        OpenLLM will use 1 worker per resource. If this is set to 2, then OpenLLM will use 2 workers per resource.
+        For example, if this is set to 0.5, then Sdserver will use 1 worker per 2 resources. If this is set to 1, then
+        Sdserver will use 1 worker per resource. If this is set to 2, then Sdserver will use 2 workers per resource.
 
         See https://docs.bentoml.org/en/latest/guides/scheduling.html#resource-scheduling-strategy for more details.
 
@@ -537,7 +551,7 @@ class SDConfig:
 
 
     def __init_subclass__(cls):
-        """The purpose of this __init_subclass__ is that we want all subclass of LLMConfig
+        """The purpose of this __init_subclass__ is that we want all subclass of SDConfig
         to adhere to the attrs contract, and have pydantic-like interface. This means we will
         construct all fields and metadata and hack into how attrs use some of the 'magic' construction
         to generate the fields.
@@ -546,7 +560,7 @@ class SDConfig:
         ModelSettings (derived from __config__) to the class.
         """
         if not cls.__name__.endswith("Config"):
-            logger.warning("LLMConfig subclass should end with 'Config'. Updating to %sConfig", cls.__name__)
+            logger.warning("SDConfig subclass should end with 'Config'. Updating to %sConfig", cls.__name__)
             cls.__name__ = f"{cls.__name__}Config"
 
         # NOTE: auto assignment attributes generated from __config__
@@ -702,7 +716,7 @@ class SDConfig:
         self.__attrs_init__(**attrs)
 
     def __getitem__(self, item: str | t.Any) -> t.Any:
-        """Allowing access LLMConfig as a dictionary. The order will always evaluate as
+        """Allowing access SDConfig as a dictionary. The order will always evaluate as
 
         __sdserver_*__ > self.key > __sdserver_extras__
 
@@ -732,13 +746,13 @@ class SDConfig:
         return _object_getattribute.__get__(self)(item)
 
     @classmethod
-    def model_derivate(cls, name: str | None = None, **attrs: t.Any) -> LLMConfig:
-        """A helper class to generate a new LLMConfig class with additional attributes.
+    def model_derivate(cls, name: str | None = None, **attrs: t.Any) -> SDConfig:
+        """A helper class to generate a new SDConfig class with additional attributes.
 
         This is useful to modify builtin __config__ value attributes.
 
         ```python
-        class DollyV2Config(openllm.LLMConfig):
+        class DollyV2Config(sdserver.SDConfig):
             ...
 
         my_new_class = DollyV2Config.model_derivate(default_id='...')
@@ -749,7 +763,7 @@ class SDConfig:
             **attrs: The attributes to be added to the new class. This will override
                      any existing attributes with the same name.
         """
-        assert cls.__config__ is not None, "Cannot derivate a LLMConfig without __config__"
+        assert cls.__config__ is not None, "Cannot derivate a SDConfig without __config__"
         _new_cfg = {k: v for k, v in attrs.items() if k in attr.fields_dict(_ModelSettingsAttr)}
         attrs = {k: v for k, v in attrs.items() if k not in _new_cfg}
         new_cls = types.new_class(
@@ -787,7 +801,6 @@ class SDConfig:
         sets from environment variables for any given configuration class.
         """
         attrs = {k: v for k, v in attrs.items() if v is not None}
-
         model_config = cls.__sdserver_env__.config
 
         env_json_string = os.environ.get(model_config, None)
@@ -805,7 +818,7 @@ class SDConfig:
         return attr.evolve(env_struct, **attrs)
 
     def model_validate_click(self, **attrs: t.Any) -> tuple[SDConfig, DictStrAny]:
-        """Parse given click attributes into a LLMConfig and return the remaining click attributes."""
+        """Parse given click attributes into a SDConfig and return the remaining click attributes."""
         sd_config_attrs: DictStrAny = {}
         key_to_remove: ListStr = []
 
@@ -832,7 +845,7 @@ class SDConfig:
     def to_click_options(cls, f: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         """
         Convert current model to click options. This can be used as a decorator for click commands.
-        Note that the identifier for all LLMConfig will be prefixed with '<model_name>_*', and the generation config
+        Note that the identifier for all SDConfig will be prefixed with '<model_name>_*', and the generation config
         will be prefixed with '<model_name>_generation_*'.
         """
 
@@ -851,13 +864,13 @@ bentoml_cattr.register_unstructure_hook_factory(
 
 def structure_sd_config(data: DictStrAny, cls: type[SDConfig]) -> SDConfig:
     """
-    Structure a dictionary to a LLMConfig object.
+    Structure a dictionary to a SDConfig object.
 
     Essentially, if the given dictionary contains a 'generation_config' key, then we will
-    use it for LLMConfig.generation_config
+    use it for SDConfig.generation_config
 
-    Otherwise, we will filter out all keys are first in LLMConfig, parse it in, then
-    parse the remaining keys into LLMConfig.generation_config
+    Otherwise, we will filter out all keys are first in SDConfig, parse it in, then
+    parse the remaining keys into SDConfig.generation_config
     """
     if not LazyType(DictStrAny).isinstance(data):
         raise RuntimeError(f"Expected a dictionary, but got {type(data)}")

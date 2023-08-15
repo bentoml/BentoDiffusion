@@ -231,20 +231,18 @@ class ModelEnv:
     if t.TYPE_CHECKING:
         config: property
         model_id: property
-        quantize: property
+        pipeline: property
+        lora_weights: property
         framework: property
-        bettertransformer: property
 
         framework_value: property
-        quantize_value: property
-        bettertransformer_value: property
 
     def __getitem__(self, item: str | t.Any) -> t.Any:
         if hasattr(self, item):
             return getattr(self, item)
         raise KeyError(f"Key {item} not found in {self}")
 
-    def __new__(cls, model_name: str, bettertransformer: bool | None = None, quantize: t.LiteralString | None = None):
+    def __new__(cls, model_name: str):
         from .._configuration import _field_env_key
         from . import codegen
 
@@ -254,14 +252,12 @@ class ModelEnv:
         res.model_name = model_name
 
         # gen properties env key
-        attributes = {"config", "model_id", "quantize", "framework", "bettertransformer"}
+        attributes = {"config", "model_id", "pipeline", "lora_weights", "framework"}
         for att in attributes:
             setattr(res, att, _field_env_key(model_name, att.upper()))
 
         # gen properties env value
         attributes_with_values = {
-            "quantize": (bool, quantize),
-            "bettertransformer": (bool, bettertransformer),
             "framework": (str, "pt"),
         }
         globs: dict[str, t.Any] = {

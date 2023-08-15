@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-CLI utilities for OpenLLM.
+CLI utilities for OneDiffusion.
 
 This extends BentoML's internal CLI CommandGroup.
 """
@@ -69,7 +69,7 @@ if t.TYPE_CHECKING:
     from ._types import ClickFunctionWrapper
     from ._types import F
     from ._types import P
-    from .models.auto.factory import _BaseAutoLLMClass
+    from .models.auto.factory import _BaseAutoSDClass
 
     ServeCommand = t.Literal["serve"]
     OutputLiteral = t.Literal["json", "pretty", "porcelain"]
@@ -181,7 +181,7 @@ output_option = click.option(
     default="pretty",
     help="Showing output type.",
     show_default=True,
-    envvar="OPENLLM_OUTPUT",
+    envvar="ONEDIFFUSION_OUTPUT",
     show_envvar=True,
 )
 
@@ -195,6 +195,34 @@ def model_id_option(factory: t.Any, model_env: ModelEnv | None = None):
         type=click.STRING,
         default=None,
         help="Optional model_id name or path for (fine-tune) weight.",
+        envvar=envvar,
+        show_envvar=True if envvar is not None else False,
+    )
+
+
+def pipeline_option(factory: t.Any, model_env: ModelEnv | None = None):
+    envvar = None
+    if model_env is not None:
+        envvar = model_env.pipeline
+    return factory.option(
+        "--pipeline",
+        type=click.STRING,
+        default=None,
+        help="Optional pipeline.",
+        envvar=envvar,
+        show_envvar=True if envvar is not None else False,
+    )
+
+
+def lora_weights_option(factory: t.Any, model_env: ModelEnv | None = None):
+    envvar = None
+    if model_env is not None:
+        envvar = model_env.lora_weights
+    return factory.option(
+        "--lora-weights",
+        type=click.STRING,
+        default=None,
+        help="Optional lora weights path.",
         envvar=envvar,
         show_envvar=True if envvar is not None else False,
     )
@@ -240,7 +268,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
             "--do-not-track",
             is_flag=True,
             default=False,
-            envvar=analytics.OPENLLM_DO_NOT_TRACK,
+            envvar=analytics.SDSERVER_DO_NOT_TRACK,
             help="Do not send usage info",
         )
         @functools.wraps(f)
@@ -277,7 +305,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
 
             with analytics.set_bentoml_tracking():
                 assert group.name is not None, "group.name should not be None"
-                event = analytics.OpenllmCliEvent(cmd_group=group.name, cmd_name=command_name)
+                event = analytics.SDServerCliEvent(cmd_group=group.name, cmd_name=command_name)
                 try:
                     return_value = func(*args, **attrs)
                     duration_in_ms = (time.time_ns() - start_time) / 1e6
@@ -437,7 +465,7 @@ def parse_serve_args(serve_grpc: bool):
         serve_command = cli.commands[command]
         # The first variable is the argument bento
         # and the last three are shared default, which we don't need.
-        serve_options = [p for p in serve_command.params[1:-3] if p.name not in _IGNORED_OPTIONS]
+        serve_options = [p for p in serve_command.params[1:-BentoMLCommandGroup.NUMBER_OF_COMMON_PARAMS] if p.name not in _IGNORED_OPTIONS]
         for options in reversed(serve_options):
             attrs = options.to_info_dict()
             # we don't need param_type_name, since it should all be options
@@ -519,15 +547,15 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         @group.command(**command_attrs)
         def noop() -> sdserver.SDConfig:
             _echo("No GPU available, therefore this command is disabled", fg="red")
-            analytics.track_start_init(llm_config)
-            return llm_config
+            analytics.track_start_init(sd_config)
+            return sd_config
 
         return noop
 
     @group.command(**command_attrs)
     @sd_config.to_click_options
     @serve_decorator
-    @cog.optgroup.group("General LLM Options")
+    @cog.optgroup.group("General OneDiffusion Options")
     @cog.optgroup.option(
         "--server-timeout",
         type=int,
@@ -535,6 +563,8 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         help="Server timeout in seconds",
     )
     @workers_per_resource_option(cog.optgroup)
+    @lora_weights_option(cog.optgroup, model_env=env)
+    @pipeline_option(cog.optgroup, model_env=env)
     @model_id_option(cog.optgroup, model_env=env)
     @cog.optgroup.option(
         "--fast",
@@ -559,6 +589,8 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         ctx: click.Context,
         server_timeout: int | None,
         model_id: str | None,
+        pipeline: str | None,
+        lora_weights: str | None,
         workers_per_resource: float | None,
         device: tuple[str, ...] | None,
         fast: bool,
@@ -627,54 +659,60 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
             )
         automodel_attrs = {
             "model_id": model_id,
+            "pipeline": pipeline,
             "sd_config": config,
             "ensure_available": not fast,
         }
 
-        # llm = t.cast(
-        #     "_BaseAutoLLMClass",
-        #     openllm[framework_envvar],  # type: ignore (internal API)
-        # ).for_model(model_name, **automodel_attrs)
+        sd = t.cast(
+             "_BaseAutoSDClass",
+             sdserver[framework_envvar],  # type: ignore (internal API)
+         ).for_model(model_name, **automodel_attrs)
 
         start_env.update(
             {
                 env.framework: env.framework_value,
-                env.config: llm.config.model_dump_json().decode(),
-                "OPENLLM_MODEL": model_name,
-                "OPENLLM_MODEL_ID": llm.model_id,
+                env.config: sd.config.model_dump_json().decode(),
+                "ONEDIFFUSION_MODEL": model_name,
+                "ONEDIFFUSION_MODEL_ID": sd.model_id,
+                "ONEDIFFUSION_PIPELINE": sd.pipeline,
                 "BENTOML_DEBUG": str(get_debug_mode()),
                 "BENTOML_CONFIG_OPTIONS": _bentoml_config_options_env,
                 "BENTOML_HOME": os.environ.get("BENTOML_HOME", BentoMLContainer.bentoml_home.get()),
             }
         )
 
-        if env.bettertransformer_value is not None:
-            start_env[env.bettertransformer] = env.bettertransformer_value
-        if env.quantize_value is not None:
-            start_env[env.quantize] = env.quantize_value
+        if lora_weights:
+            start_env["ONEDIFFUSION_LORA_WEIGHTS"] = lora_weights
 
         if t.TYPE_CHECKING:
-            server_cls: type[bentoml.HTTPServer] if not _serve_grpc else type[bentoml.GrpcServer]
+            server_cls: type[bentoml.HTTPServer]
 
-        server_cls = getattr(bentoml, "HTTPServer" if not _serve_grpc else "GrpcServer")
+        server_cls = getattr(bentoml, "HTTPServer")
         server_attrs["timeout"] = server_timeout
-        server = server_cls("_service.py:svc", **server_attrs)
+        service_ident = server_attrs["working_dir"] + "/_service.py:svc"
+        server = server_cls(service_ident, **server_attrs)
+
+        def next_step(model_name: str) -> None:
+            _echo(
+                f"\n🚀 Next step: run 'onediffusion build {model_name}' to create a Bento for {model_name}",
+                fg="blue",
+            )
+
 
         try:
-            analytics.track_start_init(llm.config)
+            analytics.track_start_init(sd.config)
             server.start(env=start_env, text=True, blocking=True)
+        except KeyboardInterrupt:
+            next_step(model_name)
         except Exception as err:
-            _echo(f"Error caught while starting LLM Server:\n{err}", fg="red")
+            _echo(f"Error caught while starting OneDiffusion Server:\n{err}", fg="red")
             raise
         else:
-            if not get_debug_mode():
-                _echo(
-                    f"\n🚀 Next step: run 'openllm build {model_name}' to create a Bento for {model_name}",
-                    fg="blue",
-                )
+            next_step(model_name)
 
         # NOTE: Return the configuration for telemetry purposes.
-        return llm_config
+        return sd_config
 
     return model_start
 
@@ -719,79 +757,21 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
 
     \b
     ```bash
-    $ openllm download opt --model-id facebook/opt-2.7b
+    $ onediffusion download opt --model-id facebook/opt-2.7b
     ```
     """
-    if output == "porcelain":
-        set_quiet_mode(True)
-        configure_logging()
 
-    config = sdserver.AutoConfig.for_model(model_name)
-    envvar = config["env"]["framework_value"]
-    model = t.cast(
-        "_BaseAutoLLMClass",
-        sdserver[envvar],  # type: ignore (internal API)
-    ).for_model(model_name, model_id=model_id, llm_config=config)
+    import bentoml._internal.frameworks.diffusers_runners.utils
+    from bentoml._internal.frameworks.diffusers_runners.utils import get_model_or_download
+    import bentoml.diffusers_runners
 
-    try:
-        _ref = bentoml.transformers.get(model.tag)
-        if output == "pretty":
-            _echo(f"{model_name} is already setup for framework '{envvar}': {str(_ref.tag)}", nl=True, fg="yellow")
-        elif output == "json":
-            _echo(
-                orjson.dumps(
-                    {"previously_setup": True, "framework": envvar, "model": str(_ref.tag)}, option=orjson.OPT_INDENT_2
-                ).decode(),
-                fg="white",
-            )
-        else:
-            if DEBUG or get_debug_mode():
-                # NOTE: When debug is enabled,
-                # We will prefix the tag with __tag__ and we can use regex to correctly
-                # get the tag from 'bentoml.bentos.build|build_bentofile'
-                _echo(f"__tag__:{_ref.tag}", fg="white")
-            else:
-                _echo(_ref.tag, fg="white")
-    except bentoml.exceptions.NotFound:
-        if output == "pretty":
-            _echo(
-                f"'{model.__class__.__name__}' with tag '{model.tag}'"
-                " does not exists in local store!. Saving to store...",
-                fg="yellow",
-                nl=True,
-            )
+    model_name = inflection.underscore(model_name)
+    module = getattr(bentoml.diffusers_runners, model_name)
+    short_name = module.MODEL_SHORT_NAME
+    default_model_id = module.DEFAULT_MODEL_ID
+    model_id = model_id or default_model_id
 
-        (model_args, model_attrs), tokenizer_attrs = model.llm_parameters
-        _ref = model.import_model(
-            model.model_id,
-            model.tag,
-            *model_args,
-            tokenizer_kwds=tokenizer_attrs,
-            trust_remote_code=model.__llm_trust_remote_code__,
-            **model_attrs,
-        )
-        if output == "pretty":
-            _echo(f"Saved model: {_ref.tag}")
-        elif output == "json":
-            _echo(
-                orjson.dumps(
-                    {"previously_setup": False, "framework": envvar, "tag": str(_ref.tag)},
-                    option=orjson.OPT_INDENT_2,
-                ).decode()
-            )
-        else:
-            if DEBUG or get_debug_mode():
-                # NOTE: When debug is enabled,
-                # We will prefix the tag with __tag__ and we can use regex to correctly
-                # get the tag from 'bentoml.bentos.build|build_bentofile'
-                _echo(f"__tag__:{_ref.tag}")
-            else:
-                _echo(_ref.tag)
-    finally:
-        if is_torch_available() and torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
-    return _ref
+    return get_model_or_download(short_name, model_id)
 
 
 if psutil.WINDOWS:
