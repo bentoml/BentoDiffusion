@@ -39,6 +39,7 @@ class Text2ImgArgs(BaseModel):
     num_inference_steps: t.Optional[int] = 50
     guidance_scale: t.Optional[float] = 7.5
     eta: t.Optional[float] = 0.0
+    lora_weights: t.Optional[str] = None
 
     class Config:
         extra = "allow"
