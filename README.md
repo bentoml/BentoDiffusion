@@ -102,7 +102,7 @@ OneDiffusion also supports running Stable Diffusion XL 1.0, the most advanced de
 onediffusion start stable-diffusion-xl
 ```
 
-It downloads the model automatically if it does not exist locally. Options such as `--model-id` is also supported. For more information, run `onediffusion start stable-diffusion-xl --help`. 
+It downloads the model automatically if it does not exist locally. Options such as `--model-id` are also supported. For more information, run `onediffusion start stable-diffusion-xl --help`. 
 
 Similarly, visit http://0.0.0.0:3000/ or send a request via `curl` to interact with the XL server. Example prompt:
 
@@ -151,10 +151,10 @@ You can create a BentoML Runner with the `diffusers_runners.create_runner()` fun
 ```python
 import bentoml
 
-# Create a runner for a Stable Diffusion model
+# Create a Runner for a Stable Diffusion model
 runner = bentoml.diffusers_runners.create_runner("CompVis/stable-diffusion-v1-4")
 
-# Create a runner for a Stable Diffusion XL model
+# Create a Runner for a Stable Diffusion XL model
 runner_xl = bentoml.diffusers_runners.stable_diffusion_xl.create_runner("stabilityai/stable-diffusion-xl-base-1.0")
 ```
 
