@@ -131,7 +131,7 @@ class _BaseAutoSDClass:
                 import bentoml
                 from bentoml._internal.frameworks.diffusers_runners.utils import get_model_or_download
                 _model_name = inflection.underscore(model_name)
-                module = getattr(bentoml.diffusers_runners, _model_name)
+                module = getattr(bentoml.diffusers_simple, _model_name)
                 short_name = module.MODEL_SHORT_NAME
                 get_model_or_download(short_name, sd.model_id)
             if not return_runner_kwargs:

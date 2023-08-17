@@ -7,7 +7,7 @@ import inflection
 
 import bentoml
 from bentoml.io import Image, JSON, Multipart
-import bentoml.diffusers_runners
+import bentoml.diffusers_simple
 
 import sdserver
 
@@ -21,7 +21,7 @@ lora_dir = os.environ.get("ONEDIFFUSION_LORA_DIR")
 sd_config = sdserver.AutoConfig.for_model(model)
 
 model_name = inflection.underscore(model)
-module = getattr(bentoml.diffusers_runners, model_name)
+module = getattr(bentoml.diffusers_simple, model_name)
 short_name = module.MODEL_SHORT_NAME
 
 model_runner = module.create_runner(

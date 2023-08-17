@@ -790,10 +790,10 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
 
     import bentoml._internal.frameworks.diffusers_runners.utils
     from bentoml._internal.frameworks.diffusers_runners.utils import get_model_or_download
-    import bentoml.diffusers_runners
+    import bentoml.diffusers_simple
 
     model_name = inflection.underscore(model_name)
-    module = getattr(bentoml.diffusers_runners, model_name)
+    module = getattr(bentoml.diffusers_simple, model_name)
     short_name = module.MODEL_SHORT_NAME
     default_model_id = module.DEFAULT_MODEL_ID
     model_id = model_id or default_model_id
