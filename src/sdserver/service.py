@@ -16,6 +16,7 @@ model_name = inflection.underscore(model)
 model_id = os.environ.get("ONEDIFFUSION_MODEL_ID", "{__model_id__}")  # model id
 pipeline = os.environ.get("ONEDIFFUSION_PIPELINE", "{__pipeline__}")  # pipeline
 lora_weights = os.environ.get("ONEDIFFUSION_LORA_WEIGHTS")
+lora_dir = os.environ.get("ONEDIFFUSION_LORA_DIR")
 
 sd_config = sdserver.AutoConfig.for_model(model)
 
@@ -27,6 +28,7 @@ model_runner = module.create_runner(
     model_id=model_id,
     pipeline_class=pipeline,
     lora_weights=lora_weights,
+    lora_dir=lora_dir,
 )
 
 input_spec_mapping = {}

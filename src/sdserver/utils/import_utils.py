@@ -233,6 +233,7 @@ class ModelEnv:
         model_id: property
         pipeline: property
         lora_weights: property
+        lora_dir: property
         framework: property
 
         framework_value: property
@@ -252,7 +253,7 @@ class ModelEnv:
         res.model_name = model_name
 
         # gen properties env key
-        attributes = {"config", "model_id", "pipeline", "lora_weights", "framework"}
+        attributes = {"config", "model_id", "pipeline", "lora_weights", "lora_dir", "framework"}
         for att in attributes:
             setattr(res, att, _field_env_key(model_name, att.upper()))
 

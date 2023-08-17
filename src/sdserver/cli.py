@@ -228,6 +228,20 @@ def lora_weights_option(factory: t.Any, model_env: ModelEnv | None = None):
     )
 
 
+def lora_dir_option(factory: t.Any, model_env: ModelEnv | None = None):
+    envvar = None
+    if model_env is not None:
+        envvar = model_env.lora_dir
+    return factory.option(
+        "--lora-dir",
+        type=click.STRING,
+        default=None,
+        help="Optional lora dir path.",
+        envvar=envvar,
+        show_envvar=True if envvar is not None else False,
+    )
+
+
 def workers_per_resource_option(factory: t.Any, build: bool = False):
     help_str = """Number of workers per resource assigned.
     See https://docs.bentoml.org/en/latest/guides/scheduling.html#resource-scheduling-strategy
@@ -563,6 +577,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         help="Server timeout in seconds",
     )
     @workers_per_resource_option(cog.optgroup)
+    @lora_dir_option(cog.optgroup, model_env=env)
     @lora_weights_option(cog.optgroup, model_env=env)
     @pipeline_option(cog.optgroup, model_env=env)
     @model_id_option(cog.optgroup, model_env=env)
@@ -591,6 +606,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         model_id: str | None,
         pipeline: str | None,
         lora_weights: str | None,
+        lora_dir: str | None,
         workers_per_resource: float | None,
         device: tuple[str, ...] | None,
         fast: bool,
@@ -683,7 +699,19 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         )
 
         if lora_weights:
+            lora_weights = os.path.expanduser(lora_weights)
+            if not os.path.isabs(lora_weights):
+                cwd = os.getcwd()
+                lora_weights = os.path.join(cwd, lora_weights)
             start_env["ONEDIFFUSION_LORA_WEIGHTS"] = lora_weights
+
+        if lora_dir is None:
+            lora_dir = os.getcwd()
+        else:
+            lora_dir = os.path.expanduser(lora_dir)
+            lora_dir = os.path.abspath(lora_dir)
+
+        start_env["ONEDIFFUSION_LORA_DIR"] = lora_dir
 
         if t.TYPE_CHECKING:
             server_cls: type[bentoml.HTTPServer]
