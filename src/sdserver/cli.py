@@ -452,7 +452,7 @@ def start_cli():
 
 
 # NOTE: A list of bentoml option that is not needed for parsing.
-# NOTE: User shouldn't set '--working-dir', as OpenLLM will setup this.
+# NOTE: User shouldn't set '--working-dir', as OneDiffusion will setup this.
 # NOTE: production is also deprecated
 _IGNORED_OPTIONS = {"working_dir", "production", "protocol_version"}
 
@@ -637,7 +637,8 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
                 fg="yellow",
             )
 
-        server_attrs.update({"working_dir": os.path.dirname(__file__)})
+        working_dir = os.path.join(os.path.dirname(__file__), f"models/{model_name}")
+        server_attrs.update({"working_dir": working_dir})
         if _serve_grpc:
             server_attrs["grpc_protocol_version"] = "v1"
         # NOTE: currently, theres no development args in bentoml.Server. To be fixed upstream.
@@ -726,7 +727,6 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
                 fg="blue",
             )
 
-
         try:
             analytics.track_start_init(sd.config)
             server.start(env=start_env, text=True, blocking=True)
@@ -756,7 +756,7 @@ def _start(
     framework: t.Literal["flax", "tf", "pt"] | None = None,
     **attrs: t.Any,
 ):
-    """Python API to start a LLM server."""
+    """Python API to start a OneDiffusion server."""
     _serve_grpc = attrs.pop("_serve_grpc", False)
 
     _ModelEnv = ModelEnv(model_name)
@@ -777,14 +777,14 @@ start = functools.partial(_start, _serve_grpc=False)
 @model_id_option(click)
 @output_option
 def download_models(model_name: str, model_id: str | None, output: OutputLiteral):
-    """Setup LLM interactively.
+    """Setup OneDiffusion interactively.
 
     \b
     Note: This is useful for development and setup for fine-tune.
 
     \b
     ```bash
-    $ onediffusion download opt --model-id facebook/opt-2.7b
+    $ onediffusion download stable-diffusion-xl --model-id stabilityai/stable-diffusion-xl-base-1.0
     ```
     """
 
