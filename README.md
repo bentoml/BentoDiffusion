@@ -48,7 +48,7 @@ Options:
   -h, --help     Show this message and exit.
 
 Commands:
-  download  Setup LLM interactively.
+  download  Setup diffusion model interactively.
   start     Start any diffusion models as a REST server.
 ```
 
