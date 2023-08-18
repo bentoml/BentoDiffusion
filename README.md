@@ -32,12 +32,13 @@ $ onediffusion -h
 
 Usage: onediffusion [OPTIONS] COMMAND [ARGS]...
 
-       ____  ____    ____
-      / ___||  _ \  / ___|  ___ _ ____   _____ _ __
-      \___ \| | | | \___ \ / _ \ '__\ \ / / _ \ '__|
-       ___) | |_| |  ___) |  __/ |   \ V /  __/ |
-      |____/|____/  |____/ \___|_|    \_/ \___|_|
-
+ ██████╗ ███╗   ██╗███████╗██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗
+██╔═══██╗████╗  ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║
+██║   ██║██╔██╗ ██║█████╗  ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║
+██║   ██║██║╚██╗██║██╔══╝  ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║
+╚██████╔╝██║ ╚████║███████╗██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║
+ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+ 
           An open platform for operating diffusion models in production.
           Fine-tune, serve, deploy, and monitor any diffusion models with ease.
 
@@ -152,7 +153,7 @@ You can create a BentoML Runner with the `diffusers_runners.create_runner()` fun
 import bentoml
 
 # Create a Runner for a Stable Diffusion model
-runner = bentoml.diffusers_runners.create_runner("CompVis/stable-diffusion-v1-4")
+runner = bentoml.diffusers_runners.stable_diffusion.create_runner("CompVis/stable-diffusion-v1-4")
 
 # Create a Runner for a Stable Diffusion XL model
 runner_xl = bentoml.diffusers_runners.stable_diffusion_xl.create_runner("stabilityai/stable-diffusion-xl-base-1.0")
