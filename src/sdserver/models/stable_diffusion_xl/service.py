@@ -50,7 +50,13 @@ input_spec_mapping["text2img"] = JSON.from_sample(
     Text2ImgArgs(prompt="a bento box")
 )
 
-class Img2ImgArgs(Text2ImgArgs):
+class Img2ImgArgs(BaseModel):
+    prompt: str
+    negative_prompt: t.Optional[str] = None
+    num_inference_steps: t.Optional[int] = 50
+    guidance_scale: t.Optional[float] = 7.5
+    eta: t.Optional[float] = 0.0
+    lora_weights: t.Optional[str] = None
     strength: t.Optional[float] = 0.8
 
 input_spec_mapping["img2img"] = Multipart(
