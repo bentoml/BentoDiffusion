@@ -44,7 +44,7 @@ if utils.DEBUG:
 _import_structure = {
     "_sd": ["SD"],
     "_configuration": ["SDConfig"],
-    #"_package": ["build"],
+    "_package": ["build"],
     "exceptions": [],
     "utils": [],
     "models": [],

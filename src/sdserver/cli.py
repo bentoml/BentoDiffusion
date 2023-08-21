@@ -802,6 +802,80 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
     return get_model_or_download(short_name, model_id)
 
 
+@cli.command(name="build")
+@click.argument(
+    "model_name", type=click.Choice([inflection.dasherize(name) for name in sdserver.CONFIG_MAPPING.keys()])
+)
+@model_id_option(click)
+@pipeline_option(click)
+@output_option
+@click.option("--overwrite", is_flag=True, help="Overwrite existing Bento for given diffusion model if it already exists.")
+@workers_per_resource_option(click, build=True)
+def build(
+    model_name: str,
+    model_id: str | None,
+    pipeline: str | None,
+    overwrite: bool,
+    output: OutputLiteral,
+    workers_per_resource: float | None,
+):
+    """Package a given models into a Bento.
+
+    \b
+    ```bash
+    $ onediffusion build stable-diffusion --model-id CompVis/stable-diffusion-v1-4
+    ```
+
+    \b
+    > NOTE: To run a container built from this Bento with GPU support, make sure
+    > to have https://github.com/NVIDIA/nvidia-container-toolkit install locally.
+    """
+    if output == "porcelain":
+        set_quiet_mode(True)
+        configure_logging()
+
+    if output == "pretty":
+        if overwrite:
+            _echo(f"Overwriting existing Bento for {model_name}.", fg="yellow")
+
+    bento, _previously_built = sdserver.build(
+        model_name,
+        __cli__=True,
+        model_id=model_id,
+        pipeline=pipeline,
+        _workers_per_resource=workers_per_resource,
+        _overwrite_existing_bento=overwrite,
+    )
+
+    if output == "pretty":
+        if not get_quiet_mode():
+            _echo("\n" + ONEDIFFUSION_FIGLET, fg="white")
+            if not _previously_built:
+                _echo(f"Successfully built {bento}.", fg="green")
+            elif not overwrite:
+                _echo(
+                    f"'{model_name}' already has a Bento built [{bento}]. To overwrite it pass '--overwrite'.",
+                    fg="yellow",
+                )
+
+            _echo(
+                "\nPossible next steps:\n\n"
+                + "* Push to BentoCloud with `bentoml push`:\n"
+                + f"    $ bentoml push {bento.tag}\n"
+                + "* Containerize your Bento with `bentoml containerize`:\n"
+                + f"    $ bentoml containerize {bento.tag}\n"
+                + "    Tip: To enable additional BentoML feature for 'containerize', "
+                + "use '--enable-features=FEATURE[,FEATURE]' "
+                + "[see 'bentoml containerize -h' for more advanced usage]\n",
+                fg="blue",
+            )
+    elif output == "json":
+        _echo(orjson.dumps(bento.info.to_dict(), option=orjson.OPT_INDENT_2).decode())
+    else:
+        _echo(bento.tag)
+    return bento
+
+
 if psutil.WINDOWS:
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
 
