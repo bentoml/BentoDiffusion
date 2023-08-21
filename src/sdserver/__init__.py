@@ -42,14 +42,12 @@ if utils.DEBUG:
 
 
 _import_structure = {
-    # "_llm": ["LLM", "Runner", "LLMRunner"],
     "_sd": ["SD"],
     "_configuration": ["SDConfig"],
     #"_package": ["build"],
     "exceptions": [],
     "utils": [],
     "models": [],
-    #"client": [],
     "cli": ["start"],
     # NOTE: models
     "models.auto": [

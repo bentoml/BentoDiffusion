@@ -54,14 +54,14 @@ if t.TYPE_CHECKING:
 
     from bentoml._internal.runner.strategy import Strategy
 
-    from .models.auto.factory import _BaseAutoLLMClass
+    from .models.auto.factory import _BaseAutoSDClass
 
     class SDRunner(bentoml.Runner):
         __doc__: str
         __module__: str
-        llm: openllm.LLM[t.Any, t.Any]
+        sd: sdserver.SD[t.Any, t.Any]
         config: sdserver.SDConfig
-        llm_type: str
+        sd_type: str
         identifying_params: dict[str, t.Any]
 
         def __call__(self, *args: t.Any, **attrs: t.Any) -> t.Any:
@@ -76,6 +76,16 @@ logger = logging.getLogger(__name__)
 
 def import_model():
     pass
+
+
+def convert_diffusion_model_name(name: str | None) -> str:
+    if name is None:
+        raise ValueError("'name' cannot be None")
+    if os.path.exists(os.path.dirname(name)):
+        name = os.path.basename(name)
+        logger.debug("Given name is a path, only returning the basename %s")
+        return name
+    return re.sub("[^a-zA-Z0-9]+", "-", name)
 
 
 _reserved_namespace = {"config_class", "model", "import_kwargs"}
@@ -348,7 +358,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
         super().__setattr__(attr, value)
 
     def __repr__(self) -> str:
-        keys = {"model_id", "runner_name", "llm_type", "config"}
+        keys = {"model_id", "runner_name", "sd_type", "config"}
         return f"{self.__class__.__name__}({', '.join(f'{k}={getattr(self, k)!r}' for k in keys)})"
 
     @property
@@ -359,10 +369,9 @@ class SD(SDInterface, t.Generic[_M, _T]):
     def runner_name(self) -> str:
         return f"onediffusion-{self.config['start_name']}-runner"
 
-    # NOTE: The section below defines a loose contract with langchain's LLM interface.
-    # @property
-    # def llm_type(self) -> str:
-    #     return convert_transformers_model_name(self._model_id)
+    @property
+    def sd_type(self) -> str:
+        return convert_diffusion_model_name(self._model_id)
 
     @property
     def identifying_params(self) -> dict[str, t.Any]:
@@ -512,7 +521,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
         return self.__llm_tokenizer__
 
     # order of these fields matter here, make sure to sync it with
-    # openllm.models.auto.factory._BaseAutoLLMClass.for_model
+    # onediffusion.models.auto.factory._BaseAutoSDClass.for_model
     def to_runner(
         self,
         models: list[bentoml.Model] | None = None,
@@ -521,7 +530,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
         method_configs: dict[str, ModelSignatureDict | ModelSignature] | None = None,
         scheduling_strategy: type[Strategy] | None = None,
     ) -> LLMRunner:
-        """Convert this LLM into a Runner.
+        """Convert this diffusion model into a Runner.
 
         Args:
             models: Any additional ``bentoml.Model`` to be included in this given models.
@@ -563,11 +572,11 @@ class SD(SDInterface, t.Generic[_M, _T]):
             SUPPORTED_RESOURCES = ("nvidia.com/gpu", "cpu")
             SUPPORTS_CPU_MULTI_THREADING = True
 
-            llm_type: str
+            sd_type: str
             identifying_params: dict[str, t.Any]
 
-            def __init_subclass__(cls, llm_type: str, identifying_params: dict[str, t.Any], **_: t.Any):
-                cls.llm_type = llm_type
+            def __init_subclass__(cls, sd_type: str, identifying_params: dict[str, t.Any], **_: t.Any):
+                cls.sd_type = sd_type
                 cls.identifying_params = identifying_params
 
             def __init__(__self: _Runnable):
@@ -635,12 +644,12 @@ class SD(SDInterface, t.Generic[_M, _T]):
             (bentoml.Runner,),
             exec_body=lambda ns: ns.update(
                 {
-                    "llm_type": self.llm_type,
+                    "sd_type": self.sd_type,
                     "identifying_params": self.identifying_params,
-                    "llm": self,  # NOTE: self reference to LLM
+                    "sd": self,  # NOTE: self reference to diffusion model
                     "config": self.config,
                     "__call__": _wrapped_generate_run,
-                    "__module__": f"openllm.models.{self.config['model_name']}",
+                    "__module__": f"onediffusion.models.{self.config['model_name']}",
                     "__doc__": self.config["env"].start_docstring,
                 }
             ),
@@ -652,7 +661,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
                     "SUPPORTED_RESOURCES": ("nvidia.com/gpu", "cpu")
                     if self.config["requires_gpu"]
                     else ("nvidia.com/gpu",),
-                    "llm_type": self.llm_type,
+                    "sd_type": self.sd_type,
                     "identifying_params": self.identifying_params,
                 },
             ),

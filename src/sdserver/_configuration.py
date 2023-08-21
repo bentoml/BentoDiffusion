@@ -519,8 +519,8 @@ class SDConfig:
         """Generated service name for this SDConfig. By default, it is 'generated_{model_name}_service.py'"""
 
         __sdserver_requirements__: ListStr | None = Field(None)
-        """The default PyPI requirements needed to run this given LLM. By default, we will depend on
-        bentoml, torch, transformers."""
+        """The default PyPI requirements needed to run this given SD. By default, we will depend on
+        bentoml, torch, transformers, diffusers, safetensors, accelerate, triton, pydantic."""
 
         __sdserver_name_type__: t.Literal["dasherize", "lowercase"] = Field("dasherize")
         """the default name typed for this model. "dasherize" will convert the name to lowercase and
