@@ -153,10 +153,10 @@ You can create a BentoML Runner with the `diffusers_runners.create_runner()` fun
 import bentoml
 
 # Create a Runner for a Stable Diffusion model
-runner = bentoml.diffusers_runners.stable_diffusion.create_runner("CompVis/stable-diffusion-v1-4")
+runner = bentoml.diffusers_simple.stable_diffusion.create_runner("CompVis/stable-diffusion-v1-4")
 
 # Create a Runner for a Stable Diffusion XL model
-runner_xl = bentoml.diffusers_runners.stable_diffusion_xl.create_runner("stabilityai/stable-diffusion-xl-base-1.0")
+runner_xl = bentoml.diffusers_simple.stable_diffusion_xl.create_runner("stabilityai/stable-diffusion-xl-base-1.0")
 ```
 
 You can then wrap the Runner into a BentoML Service. See the [BentoML documentation](https://docs.bentoml.com/en/latest/concepts/service.html) for more details.
