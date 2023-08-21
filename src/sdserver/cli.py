@@ -86,7 +86,7 @@ COLUMNS = int(os.environ.get("COLUMNS", 120))
 
 _CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "max_content_width": COLUMNS}
 
-SDSERVER_FIGLET = """\
+ONEDIFFUSION_FIGLET = """\
  ██████╗ ███╗   ██╗███████╗██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗
 ██╔═══██╗████╗  ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║
 ██║   ██║██╔██╗ ██║█████╗  ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║
@@ -249,7 +249,7 @@ def workers_per_resource_option(factory: t.Any, build: bool = False):
     for more information. By default, this is set to 1."""
     if build:
         help_str += """\n
-    NOTE: The workers value passed into 'build' will determine how the LLM can
+    NOTE: The workers value passed into 'build' will determine how the diffusion model can
     be provisioned in Kubernetes as well as in standalone container. This will
     ensure it has the same effect with 'onediffusion start --workers ...'"""
     return factory.option(
@@ -393,7 +393,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
 
             # Wrap implementation withc common parameters
             wrapped = self.common_params(f)
-            # Wrap into OpenLLM tracking
+            # Wrap into OneDiffusion tracking
             wrapped = self.usage_tracking(wrapped, self, **attrs)
             # Wrap into exception handling
             if "do_not_track" in attrs:
@@ -428,12 +428,12 @@ class SDServerCommandGroup(BentoMLCommandGroup):
 def cli():
     """
     \b
- ____  ____    ____
-/ ___||  _ \  / ___|  ___ _ ____   _____ _ __
-\___ \| | | | \___ \ / _ \ '__\ \ / / _ \ '__|
- ___) | |_| |  ___) |  __/ |   \ V /  __/ |
-|____/|____/  |____/ \___|_|    \_/ \___|_|
-
+ ██████╗ ███╗   ██╗███████╗██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗
+██╔═══██╗████╗  ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║
+██║   ██║██╔██╗ ██║█████╗  ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║
+██║   ██║██║╚██╗██║██╔══╝  ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║
+╚██████╔╝██║ ╚████║███████╗██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║
+ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
     \b
     An open platform for operating diffusion models in production.
     Fine-tune, serve, deploy, and monitor any diffusion models with ease.
@@ -517,7 +517,7 @@ def start_model_command(
     Returns:
         The click.Command for starting the model server
 
-    Note that the internal commands will return the llm_config and a boolean determine
+    Note that the internal commands will return the sd_config and a boolean determine
     whether the server is run with GPU or not.
     """
     from bentoml._internal.configuration.containers import BentoMLContainer
