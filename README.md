@@ -1,4 +1,16 @@
-# OneDiffusion
+<div align="center">
+    <h1 align="center">🖼️ OneDiffusion</h1>
+    <a href="https://pypi.org/project/onediffusion">
+        <img src="https://img.shields.io/pypi/v/onediffusion.svg?logo=pypi&label=PyPI&logoColor=gold" alt="pypi_status" />
+    </a>
+    <a href="https://twitter.com/bentomlai">
+        <img src="https://badgen.net/badge/icon/@bentomlai/1DA1F2?icon=twitter&label=Follow%20Us" alt="Twitter" />
+    </a>
+    <a href="https://l.bentoml.com/join-openllm-discord">
+        <img src="https://badgen.net/badge/icon/AI%20Developers/7289da?icon=discord&label=Join%20Us" alt="Discord" />
+    </a>
+</div>
+<br>
 
 OneDiffusion is an open-source one-stop shop for facilitating the deployment of any diffusion models in production. It caters specifically to the needs of diffusion models, supporting both pretrained and fine-tuned diffusion models with LoRA adapters.
 
