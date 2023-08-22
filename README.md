@@ -147,7 +147,7 @@ onediffusion download stable-diffusion --model-id "CompVis/stable-diffusion-v1-4
 
 ## Create a BentoML Runner
 
-You can create a BentoML Runner with the `diffusers_runners.create_runner()` function, which downloads the model specified automatically if it does not exist locally.
+You can create a BentoML Runner with `diffusers_simple.stable_diffusion.create_runner()`, which downloads the model specified automatically if it does not exist locally.
 
 ```python
 import bentoml
