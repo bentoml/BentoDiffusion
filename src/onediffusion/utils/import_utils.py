@@ -83,46 +83,6 @@ def is_torch_available():
     return _torch_available
 
 
-def is_tf_available():
-    global _tf_available
-    if FORCE_TF_AVAILABLE in ENV_VARS_TRUE_VALUES:
-        _tf_available = True
-    else:
-        _tf_version = None
-        if USE_TF in ENV_VARS_TRUE_AND_AUTO_VALUES and USE_TORCH not in ENV_VARS_TRUE_VALUES:
-            if _tf_available:
-                candidates = (
-                    "tensorflow",
-                    "tensorflow-cpu",
-                    "tensorflow-gpu",
-                    "tf-nightly",
-                    "tf-nightly-cpu",
-                    "tf-nightly-gpu",
-                    "intel-tensorflow",
-                    "intel-tensorflow-avx512",
-                    "tensorflow-rocm",
-                    "tensorflow-macos",
-                    "tensorflow-aarch64",
-                )
-                _tf_version = None
-                # For the metadata, we have to look for both tensorflow and tensorflow-cpu
-                for _pkg in candidates:
-                    try:
-                        _tf_version = importlib.metadata.version(_pkg)
-                        break
-                    except importlib.metadata.PackageNotFoundError:
-                        pass
-                _tf_available = _tf_version is not None
-            if _tf_available:
-                if _tf_version and version.parse(_tf_version) < version.parse("2"):
-                    logger.info(f"TensorFlow found but with version {_tf_version}. OpenLLM only supports TF 2.x")
-                    _tf_available = False
-        else:
-            logger.info("Disabling Tensorflow because USE_TORCH is set")
-            _tf_available = False
-    return _tf_available
-
-
 def is_flax_available():
     global _flax_available
     if USE_JAX in ENV_VARS_TRUE_AND_AUTO_VALUES:
@@ -212,12 +172,8 @@ def require_backends(o: t.Any, backends: t.MutableSequence[str]):
     name = o.__name__ if hasattr(o, "__name__") else o.__class__.__name__
 
     # Raise an error for users who might not realize that classes without "TF" are torch-only
-    if "torch" in backends and "tf" not in backends and not is_torch_available() and is_tf_available():
+    if "torch" in backends and not is_torch_available():
         raise ImportError(PYTORCH_IMPORT_ERROR_WITH_TF.format(name))
-
-    # Raise the inverse error for PyTorch users trying to load TF classes
-    if "tf" in backends and "torch" not in backends and is_torch_available() and not is_tf_available():
-        raise ImportError(TF_IMPORT_ERROR_WITH_PYTORCH.format(name))
 
     checks = (BACKENDS_MAPPING[backend] for backend in backends)
     failed = [msg.format(name) for available, msg in checks if not available()]
