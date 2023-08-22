@@ -150,7 +150,7 @@ Alternatively, dynamically load LoRA weights by adding the `lora_weights` field:
 
 Example output:
 
-[dynamic loading](/example-images/dynamic-loading.gif)
+![dynamic loading](/example-images/dynamic-loading.gif)
 
 ## Download a model
 
