@@ -7,7 +7,7 @@ Key features include:
 - 🌐 **Broad compatibility**: Support both pretrained and LoRA-adapted diffusion models, providing flexibility in choosing and deploying the appropriate model for various image generation tasks. It currently supports Stable Diffusion (v1.4, v1.5 and v2.0) and Stable Diffusion XL (v1.0) models. Support for more models (for example, ControlNet) is on the way.
 - 💪 **Optimized performance and scalability**: Apply the best in class optimizations for serving diffusion models on your behalf.
 - ⌛️ **Dynamic LoRA adapter loading**: Dynamically load and unload LoRA adapters on every request, providing greater adaptability and ensuring the models remain responsive to changing inputs and conditions.
-- 🍱 **First-class support for BentoML**: Seamless integration with the [BentoML](https://github.com/bentoml/BentoML) ecosystem, allowing you to build Bentos and push them to [BentoCloud](https://www.bentoml.com/cloud) or [Yatai](https://github.com/bentoml/Yatai). 
+- 🍱 **First-class support for BentoML**: Seamless integration with the [BentoML](https://github.com/bentoml/BentoML) ecosystem, allowing you to build Bentos and push them to [BentoCloud](https://www.bentoml.com/cloud). 
 
 OneDiffusion is designed for AI application developers who require a robust and flexible platform for deploying diffusion models in production. The platform offers tools and features to fine-tune, serve, deploy, and monitor these models effectively, streamlining the end-to-end workflow for diffusion model deployment.
 
@@ -121,7 +121,7 @@ Similarly, visit http://0.0.0.0:3000/ or send a request via `curl` to interact w
 
 Example output:
 
-[sdxl-cat](/example-images/sdxl-cat.jpeg)
+![sdxl-cat](/example-images/sdxl-cat.jpeg)
 
 ### Add LoRA weights
 
