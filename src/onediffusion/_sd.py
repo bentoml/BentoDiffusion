@@ -102,6 +102,14 @@ class SDInterface(ABC):
         """
         pass
 
+    @property
+    def import_kwargs(self) -> tuple[dict[str, t.Any], dict[str, t.Any]] | None:
+        """The default import kwargs to used when importing the model.
+        This will be passed into 'openllm.LLM.import_model'.
+        It returns two dictionaries: one for model kwargs and one for tokenizer kwargs.
+        """
+        return
+
     def import_model(
         self, model_id: str, tag: bentoml.Tag, *args: t.Any, **attrs: t.Any
     ) -> bentoml.Model:
@@ -148,7 +156,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
             if "config_class" not in cd:
                 raise RuntimeError(
                     "Missing required key 'config_class'. Make sure to define it within the SD subclass."
-                ),
+                )
 
         if cls.import_model is SDInterface.import_model:
             # using the default import model
@@ -157,7 +165,6 @@ class SD(SDInterface, t.Generic[_M, _T]):
             logger.debug("Custom 'import_model' will be used when loading model %s", cls.__name__)
 
         cls.__sd_post_init__ = None if cls.sd_post_init is SDInterface.sd_post_init else cls.sd_post_init
-        cls.__sd_custom_load__ = None if cls.load_model is SDInterface.load_model else cls.load_model
         cls.__sd_init_kwargs__ = None if cls.import_kwargs is SDInterface.import_kwargs else cls.import_kwargs
 
         for attr in {"bentomodel", "tag", "model"}:

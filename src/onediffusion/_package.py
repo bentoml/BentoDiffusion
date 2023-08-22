@@ -259,13 +259,11 @@ def build(
                 module = getattr(bentoml.diffusers_simple, _model_name)
                 short_name = module.MODEL_SHORT_NAME
                 _model_id = model_id or module.DEFAULT_MODEL_ID
-                print("wukuku", short_name, _model_id)
                 bento_model = get_model_or_download(
                     model_name=short_name,
                     model_id=_model_id,
                 )
                 model_version = bento_model.tag.version
-                print("aldsfkjals", bento_model)
 
                 content = f.read()
                 content = content.replace(r"{__model_name__}", model_name)
