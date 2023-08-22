@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import typing as t
 
-import sdserver
+import onediffusion
 
 from ... import utils
 
@@ -30,8 +30,8 @@ _import_structure = {
 
 try:
     if not utils.is_torch_available():
-        raise sdserver.exceptions.MissingDependencyError
-except sdserver.exceptions.MissingDependencyError:
+        raise onediffusion.exceptions.MissingDependencyError
+except onediffusion.exceptions.MissingDependencyError:
     pass
 else:
     _import_structure["modeling_auto"].extend(["AutoSD", "MODEL_MAPPING"])
@@ -47,8 +47,8 @@ if t.TYPE_CHECKING:
 
     try:
         if not utils.is_torch_available():
-            raise sdserver.exceptions.MissingDependencyError
-    except sdserver.exceptions.MissingDependencyError:
+            raise onediffusion.exceptions.MissingDependencyError
+    except onediffusion.exceptions.MissingDependencyError:
         pass
     else:
         from .modeling_auto import MODEL_MAPPING as MODEL_MAPPING

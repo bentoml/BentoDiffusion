@@ -20,7 +20,7 @@ from collections import OrderedDict
 
 import inflection
 
-import sdserver
+import onediffusion
 
 
 if t.TYPE_CHECKING:
@@ -28,11 +28,11 @@ if t.TYPE_CHECKING:
     from collections import _odict_keys
     from collections import _odict_values
 
-    ConfigOrderedDict = OrderedDict[str, type[sdserver.SDConfig]]
+    ConfigOrderedDict = OrderedDict[str, type[onediffusion.SDConfig]]
 
-    ConfigKeysView = _odict_keys[str, type[sdserver.SDConfig]]
-    ConfigValuesView = _odict_values[str, type[sdserver.SDConfig]]
-    ConfigItemsView = _odict_items[str, type[sdserver.SDConfig]]
+    ConfigKeysView = _odict_keys[str, type[onediffusion.SDConfig]]
+    ConfigValuesView = _odict_values[str, type[onediffusion.SDConfig]]
+    ConfigItemsView = _odict_items[str, type[onediffusion.SDConfig]]
 else:
     ConfigKeysView = ConfigValuesView = ConfigItemsView = t.Any
     ConfigOrderedDict = OrderedDict
@@ -60,13 +60,13 @@ class _LazyConfigMapping(ConfigOrderedDict):
         value = self._mapping[key]
         module_name = inflection.underscore(key)
         if module_name not in self._modules:
-            self._modules[module_name] = sdserver.utils.ModelEnv(module_name).module
+            self._modules[module_name] = onediffusion.utils.ModelEnv(module_name).module
         if hasattr(self._modules[module_name], value):
             return getattr(self._modules[module_name], value)
 
         # Some of the mappings have entries model_type -> config of another model type. In that case we try to grab the
         # object at the top level.
-        return getattr(sdserver, value)
+        return getattr(onediffusion, value)
 
     def keys(self):
         return t.cast(ConfigKeysView, list(self._mapping.keys()) + list(self._extra_content.keys()))
@@ -88,11 +88,11 @@ class _LazyConfigMapping(ConfigOrderedDict):
         Register a new configuration in this mapping.
         """
         if key in self._mapping.keys():
-            raise ValueError(f"'{key}' is already used by a SDServer config, pick another name.")
+            raise ValueError(f"'{key}' is already used by a OneDiffusion config, pick another name.")
         self._extra_content[key] = value
 
 
-CONFIG_MAPPING: dict[str, type[sdserver.SDConfig]] = _LazyConfigMapping(CONFIG_MAPPING_NAMES)
+CONFIG_MAPPING: dict[str, type[onediffusion.SDConfig]] = _LazyConfigMapping(CONFIG_MAPPING_NAMES)
 
 # The below handle special alias when we call underscore to the name directly
 # without processing camelcase first.
@@ -107,7 +107,7 @@ class AutoConfig:
         raise EnvironmentError("Cannot instantiate Config. Please use `Config.for_model(model_name)` instead.")
 
     @classmethod
-    def for_model(cls, model_name: str, **attrs: t.Any) -> sdserver.SDConfig:
+    def for_model(cls, model_name: str, **attrs: t.Any) -> onediffusion.SDConfig:
         model_name = inflection.underscore(model_name)
         if model_name in CONFIG_MAPPING:
             return CONFIG_MAPPING[model_name].model_construct_env(**attrs)
@@ -117,7 +117,7 @@ class AutoConfig:
         )
 
     @classmethod
-    def infer_class_from_name(cls, name: str) -> type[sdserver.SDConfig]:
+    def infer_class_from_name(cls, name: str) -> type[onediffusion.SDConfig]:
         model_name = inflection.underscore(name)
         if model_name in CONFIG_NAME_ALIASES:
             model_name = CONFIG_NAME_ALIASES[model_name]

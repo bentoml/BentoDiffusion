@@ -23,7 +23,7 @@ from .factory import _LazyAutoMapping
 
 
 if t.TYPE_CHECKING:
-    import sdserver
+    import onediffusion
 
 MODEL_MAPPING_NAMES = OrderedDict(
     [
@@ -33,7 +33,7 @@ MODEL_MAPPING_NAMES = OrderedDict(
 )
 
 MODEL_MAPPING: dict[
-    type[sdserver.SDConfig], type[sdserver.LLM[transformers.PreTrainedModel, transformers.PreTrainedTokenizerFast]]
+    type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]
 ] = _LazyAutoMapping(CONFIG_MAPPING_NAMES, MODEL_MAPPING_NAMES)
 
 

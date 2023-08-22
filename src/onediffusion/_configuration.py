@@ -12,44 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Configuration utilities for SDConfig. All model configuration will inherit from ``sdserver.SDConfig``.
+Configuration utilities for SDConfig. All model configuration will inherit from ``onediffusion.SDConfig``.
 
-Highlight feature: Each fields in ``sdserver.SDConfig`` will also automatically generate a environment
+Highlight feature: Each fields in ``onediffusion.SDConfig`` will also automatically generate a environment
 variable based on its name field.
 
 For example, the following config class:
 
 ```python
-class FlanT5Config(sdserver.SDConfig):
+class StableDiffusionConfig(onediffusion.SDConfig):
     __config__ = {
-        "url": "https://huggingface.co/docs/transformers/model_doc/flan-t5",
-        "default_id": "google/flan-t5-large",
+        "timeout": 3600000,
+        "url": "https://github.com/Stability-AI/stablediffusion",
+        "default_id": "stabilityai/stable-diffusion-2",
         "model_ids": [
-            "google/flan-t5-small",
-            "google/flan-t5-base",
-            "google/flan-t5-large",
-            "google/flan-t5-xl",
-            "google/flan-t5-xxl",
+            "CompVis/stable-diffusion-v1-4",
+            "runwayml/stable-diffusion-v1-5",
+            "stabilityai/stable-diffusion-2",
         ],
+        "default_pipeline": "text2img",
+        "pipelines": ["text2img", "img2img"],
     }
-
-    class GenerationConfig:
-        temperature: float = 0.9
-        max_new_tokens: int = 2048
-        top_k: int = 50
-        top_p: float = 0.4
-        repetition_penalty = 1.0
 ```
 
 which generates the environment ONEDIFFUSION_FLAN_T5_GENERATION_TEMPERATURE for users to configure temperature
 dynamically during serve, ahead-of-serve or per requests.
 
-Refer to ``sdserver.SDConfig`` docstring for more information.
+Refer to ``onediffusion.SDConfig`` docstring for more information.
 """
 from __future__ import annotations
 
 import functools
-import inspect
 import logging
 import os
 import sys
@@ -64,7 +57,7 @@ from cattr.gen import make_dict_unstructure_fn
 from cattr.gen import override
 from deepmerge.merger import Merger
 
-import sdserver
+import onediffusion
 
 from .exceptions import ForbiddenAttributeError
 from .utils import DEBUG
@@ -119,7 +112,7 @@ else:
     DictStrAny = dict
     ItemgetterAny = itemgetter
     # NOTE: Using internal API from attr here, since we are actually
-    # allowing subclass of sdserver.SDConfig to become 'attrs'-ish
+    # allowing subclass of onediffusion.SDConfig to become 'attrs'-ish
     from attr._make import _CountingAttr
     from attr._make import _make_init
     from attr._make import _make_repr
@@ -170,7 +163,7 @@ class ModelSettings(t.TypedDict, total=False):
     name_type: t.Literal["dasherize", "lowercase"]
     model_name: NotRequired[str]
     start_name: NotRequired[str]
-    env: NotRequired[sdserver.utils.ModelEnv]
+    env: NotRequired[onediffusion.utils.ModelEnv]
 
     # serving configuration
     timeout: int
@@ -251,7 +244,7 @@ def structure_settings(cl_: type[SDConfig], cls: type[_ModelSettingsAttr]):
         if _settings_attr["name_type"] == "dasherize"
         else _final_value_dct["model_name"]
     )
-    env = sdserver.utils.ModelEnv(_final_value_dct["model_name"])
+    env = onediffusion.utils.ModelEnv(_final_value_dct["model_name"])
     _final_value_dct["env"] = env
 
     _final_value_dct["service_name"] = f"generated_{_final_value_dct['model_name']}_service.py"
@@ -374,7 +367,7 @@ def __sd_config_transform__(cls: type[SDConfig]) -> type[SDConfig]:
 @attr.define(slots=True)
 class SDConfig:
     """
-    ``sdserver.SDConfig`` is somewhat a hybrid combination between the performance of `attrs` with the
+    ``onediffusion.SDConfig`` is somewhat a hybrid combination between the performance of `attrs` with the
     easy-to-use interface that pydantic offer. It lives in between where it allows users to quickly formulate
     a SDConfig for any LLM without worrying too much about performance. It does a few things:
 
@@ -393,7 +386,7 @@ class SDConfig:
     To directly configure GenerationConfig for any given LLM, create a GenerationConfig under the subclass:
 
     ```python
-    class FlanT5Config(sdserver.SDConfig):
+    class FlanT5Config(onediffusion.SDConfig):
         class GenerationConfig:
             temperature: float = 0.75
             max_new_tokens: int = 3000
@@ -401,7 +394,7 @@ class SDConfig:
             top_p: float = 0.4
             repetition_penalty = 1.0
     ```
-    By doing so, sdserver.SDConfig will create a compatible GenerationConfig attrs class that can be converted
+    By doing so, onediffusion.SDConfig will create a compatible GenerationConfig attrs class that can be converted
     to ``transformers.GenerationConfig``. These attribute can be accessed via ``SDConfig.generation_config``.
 
     By default, all SDConfig must provide a __config__ with 'default_id' and 'model_ids'.
@@ -409,7 +402,7 @@ class SDConfig:
     All other fields are optional, and will be use default value if not set.
 
     ```python
-    class FalconConfig(sdserver.SDConfig):
+    class FalconConfig(onediffusion.SDConfig):
         __config__ = {
             "name_type": "lowercase",
             "trust_remote_code": True,
@@ -434,9 +427,9 @@ class SDConfig:
     attrs.fields with pydantic-compatible interface. For example:
 
     ```python
-    class MyModelConfig(sdserver.SDConfig):
+    class MyModelConfig(onediffusion.SDConfig):
 
-        field1 = sdserver.SDConfig.Field(...)
+        field1 = onediffusion.SDConfig.Field(...)
     ```
     """
 
@@ -451,7 +444,7 @@ class SDConfig:
         default value. For example:
 
         ```python
-        class MyAwesomeModelConfig(sdserver.SDConfig):
+        class MyAwesomeModelConfig(onediffusion.SDConfig):
             class GenerationConfig:
                 max_new_tokens: int = 200
                 top_k: int = 10
@@ -460,14 +453,14 @@ class SDConfig:
         ```
         """
 
-        # NOTE: Internal attributes that should only be used by Sdserver. Users usually shouldn't
+        # NOTE: Internal attributes that should only be used by Onediffusion. Users usually shouldn't
         # concern any of these. These are here for pyright not to complain.
         def __attrs_init__(self, **attrs: t.Any):
             """Generated __attrs_init__ for SDConfig subclass that follows the attrs contract."""
 
         __attrs_attrs__: tuple[attr.Attribute[t.Any], ...] = Field(None, init=False)
         """Since we are writing our own __init_subclass__, which is an alternative way for __prepare__,
-        we want sdserver.SDConfig to be attrs-like dataclass that has pydantic-like interface.
+        we want onediffusion.SDConfig to be attrs-like dataclass that has pydantic-like interface.
         __attrs_attrs__ will be handled dynamically by __init_subclass__.
         """
 
@@ -483,7 +476,7 @@ class SDConfig:
         # NOTE: The following will be populated from __config__ and also
         # considered to be public API.
         __sdserver_default_id__: str = Field(None)
-        """Return the default model to use when using 'sdserver start <model_id>'.
+        """Return the default model to use when using 'onediffusion start <model_id>'.
         This could be one of the keys in 'self.model_ids' or custom users model.
 
         This field is required when defining under '__config__'.
@@ -500,7 +493,7 @@ class SDConfig:
         """
 
         __sdserver_default_pipeline__: str = Field(None)
-        """Return the default pipeline to use when using 'sdserver start <model_id>'.
+        """Return the default pipeline to use when using 'onediffusion start <model_id>'.
 
         This field is required when defining under '__config__'.
         """
@@ -530,9 +523,9 @@ class SDConfig:
         """The normalized version of __sdserver_start_name__, determined by __sdserver_name_type__"""
 
         __sdserver_start_name__: str = Field(None)
-        """Default name to be used with `sdserver start`"""
+        """Default name to be used with `onediffusion start`"""
 
-        __sdserver_env__: sdserver.utils.ModelEnv = Field(None, init=False)
+        __sdserver_env__: onediffusion.utils.ModelEnv = Field(None, init=False)
         """A ModelEnv instance for this SDConfig."""
 
         __sdserver_timeout__: int = Field(36e6)
@@ -587,7 +580,7 @@ class SDConfig:
         unannotated = ca_names - annotated_names
         if len(unannotated) > 0:
             missing_annotated = sorted(unannotated, key=lambda n: t.cast("_CountingAttr[t.Any]", cd.get(n)).counter)
-            raise sdserver.exceptions.MissingAnnotationAttributeError(
+            raise onediffusion.exceptions.MissingAnnotationAttributeError(
                 f"The following field doesn't have a type annotation: {missing_annotated}"
             )
 
@@ -752,7 +745,7 @@ class SDConfig:
         This is useful to modify builtin __config__ value attributes.
 
         ```python
-        class DollyV2Config(sdserver.SDConfig):
+        class DollyV2Config(onediffusion.SDConfig):
             ...
 
         my_new_class = DollyV2Config.model_derivate(default_id='...')
@@ -832,8 +825,8 @@ class SDConfig:
     @classmethod
     @t.overload
     def to_click_options(
-        cls, f: t.Callable[..., sdserver.SDConfig]
-    ) -> F[P, ClickFunctionWrapper[..., sdserver.SDConfig]]:
+        cls, f: t.Callable[..., onediffusion.SDConfig]
+    ) -> F[P, ClickFunctionWrapper[..., onediffusion.SDConfig]]:
         ...
 
     @classmethod

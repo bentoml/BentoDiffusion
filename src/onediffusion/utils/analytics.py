@@ -30,7 +30,7 @@ from bentoml._internal.utils.analytics import usage_stats as _internal_usage
 
 
 if t.TYPE_CHECKING:
-    import sdserver
+    import onediffusion
 
 from ..__about__ import __version__
 
@@ -69,7 +69,7 @@ def set_bentoml_tracking():
 class SDServerCliEvent(_internal_analytics.schemas.EventMeta):
     cmd_group: str
     cmd_name: str
-    sdserver_version: str = __version__
+    onediffusion_version: str = __version__
 
     # NOTE: reserved for the do_not_track logics
     duration_in_ms: t.Any = attr.field(default=None)
@@ -83,12 +83,12 @@ class StartInitEvent(_internal_analytics.schemas.EventMeta):
     sd_config: t.Dict[str, t.Any] = attr.field(default=None)
 
     @staticmethod
-    def handler(sd_config: sdserver.SDConfig) -> StartInitEvent:
+    def handler(sd_config: onediffusion.SDConfig) -> StartInitEvent:
         return StartInitEvent(model_name=sd_config["model_name"], sd_config=sd_config.model_dump())
 
 
 def track_start_init(
-    sd_config: sdserver.SDConfig,
+    sd_config: onediffusion.SDConfig,
 ):
     if do_not_track():
         return

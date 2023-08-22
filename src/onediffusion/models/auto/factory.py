@@ -22,7 +22,7 @@ from collections import OrderedDict
 
 import inflection
 
-import sdserver
+import onediffusion
 
 from .configuration_auto import AutoConfig
 
@@ -34,10 +34,10 @@ if t.TYPE_CHECKING:
 
     from ..._llm import LLMRunner
 
-    ConfigModelOrderedDict = OrderedDict[type[sdserver.SDConfig], type[sdserver.SD[t.Any, t.Any]]]
-    ConfigModelKeysView = _odict_keys[type[sdserver.SDConfig], type[sdserver.SD[t.Any, t.Any]]]
-    ConfigModelValuesView = _odict_values[type[sdserver.SDConfig], type[sdserver.SD[t.Any, t.Any]]]
-    ConfigModelItemsView = _odict_items[type[sdserver.SDConfig], type[sdserver.SD[t.Any, t.Any]]]
+    ConfigModelOrderedDict = OrderedDict[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
+    ConfigModelKeysView = _odict_keys[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
+    ConfigModelValuesView = _odict_values[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
+    ConfigModelItemsView = _odict_items[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
 else:
     ConfigModelKeysView = ConfigModelValuesView = ConfigModelItemsView = t.Any
     ConfigModelOrderedDict = OrderedDict
@@ -62,10 +62,10 @@ class _BaseAutoSDClass:
         model_id: str | None = None,
         pipeline: str | None = None,
         return_runner_kwargs: t.Literal[False] = ...,
-        sd_config: sdserver.SDConfig | None = ...,
+        sd_config: onediffusion.SDConfig | None = ...,
         ensure_available: t.Literal[False, True] = ...,
         **attrs: t.Any,
-    ) -> sdserver.SD[t.Any, t.Any]:
+    ) -> onediffusion.SD[t.Any, t.Any]:
         ...
 
     @t.overload
@@ -76,10 +76,10 @@ class _BaseAutoSDClass:
         model_id: str | None = None,
         pipeline: str | None = None,
         return_runner_kwargs: t.Literal[True] = ...,
-        sd_config: sdserver.SDConfig | None = ...,
+        sd_config: onediffusion.SDConfig | None = ...,
         ensure_available: t.Literal[False, True] = ...,
         **attrs: t.Any,
-    ) -> tuple[sdserver.SD[t.Any, t.Any], dict[str, t.Any]]:
+    ) -> tuple[onediffusion.SD[t.Any, t.Any], dict[str, t.Any]]:
         ...
 
     @classmethod
@@ -89,10 +89,10 @@ class _BaseAutoSDClass:
         model_id: str | None = None,
         pipeline: str | None = None,
         return_runner_kwargs: bool = False,
-        sd_config: sdserver.SDConfig | None = None,
+        sd_config: onediffusion.SDConfig | None = None,
         ensure_available: bool = False,
         **attrs: t.Any,
-    ) -> sdserver.SD[t.Any, t.Any] | tuple[openllm.LLM[t.Any, t.Any], dict[str, t.Any]]:
+    ) -> onediffusion.SD[t.Any, t.Any] | tuple[openllm.LLM[t.Any, t.Any], dict[str, t.Any]]:
         """The lower level API for creating a LLM instance.
 
         ```python
@@ -111,7 +111,7 @@ class _BaseAutoSDClass:
         to_runner_attrs = {k: v for k, v in attrs.items() if k in runner_kwargs_name}
         attrs = {k: v for k, v in attrs.items() if k not in to_runner_attrs}
         if cls._model_mapping.get(inflection.underscore(model_name), None, mapping_type="name2model"):
-            if not isinstance(sd_config, sdserver.SDConfig):
+            if not isinstance(sd_config, onediffusion.SDConfig):
                 # The rest of kwargs is now passed to config
                 sd_config = AutoConfig.for_model(model_name, **attrs)
                 attrs = sd_config.__sdserver_extras__
@@ -170,15 +170,15 @@ def getattribute_from_module(module: types.ModuleType, attr: t.Any) -> t.Any:
         return getattr(module, attr)
     # Some of the mappings have entries model_type -> object of another model type. In that case we try to grab the
     # object at the top level.
-    sdserver_module = importlib.import_module("sdserver")
+    od_module = importlib.import_module("onediffusion")
 
-    if module != sdserver_module:
+    if module != od_module:
         try:
-            return getattribute_from_module(sdserver_module, attr)
+            return getattribute_from_module(od_module, attr)
         except ValueError:
-            raise ValueError(f"Could not find {attr} neither in {module} nor in {sdserver_module}!")
+            raise ValueError(f"Could not find {attr} neither in {module} nor in {od_module}!")
     else:
-        raise ValueError(f"Could not find {attr} in {sdserver_module}!")
+        raise ValueError(f"Could not find {attr} in {od_module}!")
 
 
 class _LazyAutoMapping(ConfigModelOrderedDict):
@@ -198,7 +198,7 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
         common_keys = set(self._config_mapping.keys()).intersection(self._model_mapping.keys())
         return len(common_keys) + len(self._extra_content)
 
-    def __getitem__(self, key: type[sdserver.SDConfig]) -> type[sdserver.SD[t.Any, t.Any]]:
+    def __getitem__(self, key: type[onediffusion.SDConfig]) -> type[onediffusion.SD[t.Any, t.Any]]:
         if key in self._extra_content:
             return self._extra_content[key]
         model_type = self._reverse_config_mapping[key.__name__]
@@ -217,7 +217,7 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
     def _load_attr_from_module(self, model_type: str, attr: str) -> t.Any:
         module_name = inflection.underscore(model_type)
         if module_name not in self._modules:
-            self._modules[module_name] = importlib.import_module(f".{module_name}", "sdserver.models")
+            self._modules[module_name] = importlib.import_module(f".{module_name}", "onediffusion.models")
         return getattribute_from_module(self._modules[module_name], attr)
 
     def keys(self):

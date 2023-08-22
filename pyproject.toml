@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sdserver"
+name = "onediffusion"
 authors = [
     { name = "Shenyang Zhao", email = "larme@bentoml.com" },
     { name = "BentoML Team", email = "contact@bentoml.com" },
 ]
-description = 'SdServer: REST API server for running any Stable Diffusion like Model - Stable Diffusion, Anything, ControlNet, Lora, Custom'
+description = 'Onediffusion: REST API server for running any diffusion models - Stable Diffusion, Anything, ControlNet, Lora, Custom'
 dynamic = ["version"]
 keywords = [
     "MLOps",
@@ -57,21 +57,22 @@ dependencies = [
     "inflection",
     "huggingface_hub",
     "pydantic",
+    "safetensors",
     # tabulate for CLI with CJK support
     # >=0.9.0 for some bug fixes
     "tabulate[widechars]>=0.9.0",
 ]
 
 [project.urls]
-Documentation = "https://github.com/BentoML/sdserver#readme"
-Issues = "https://github.com/BentoML/sdserver/issues"
-Source = "https://github.com/BentoML/sdserver"
+Documentation = "https://github.com/BentoML/OneDiffusion#readme"
+Issues = "https://github.com/BentoML/OneDiffusion/issues"
+Source = "https://github.com/BentoML/OneDiffusion"
 
 [project.scripts]
-onediffusion = "sdserver.cli:cli"
+onediffusion = "onediffusion.cli:cli"
 
 [tool.hatch.version]
-path = "src/sdserver/__about__.py"
+path = "src/onediffusion/__about__.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -108,7 +109,7 @@ dependencies = [
   "ruff>=0.0.243",
 ]
 [tool.hatch.envs.lint.scripts]
-typing = "pyright {args:src/sdserver tests} {args:src/sdserver tests}"
+typing = "pyright {args:src/onediffusion tests} {args:src/onediffusion tests}"
 style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
@@ -139,7 +140,7 @@ exclude = '''
     | lib
     | dist
   )/
-  | src/sdserver/__about__.py
+  | src/onediffusion/__about__.py
 )
 '''
 target-version = ["py310"]
@@ -192,7 +193,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["sdserver", "bentoml", "diffusers"]
+known-first-party = ["onediffusion", "bentoml", "diffusers"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -202,16 +203,16 @@ ban-relative-imports = "all"
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.coverage.run]
-source_pkgs = ["sdserver", "tests"]
+source_pkgs = ["onediffusion", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/sdserver/__about__.py",
+  "src/onediffusion/__about__.py",
 ]
 
 [tool.coverage.paths]
-sdserver = ["src/sdserver", "*/sdserver/src/sdserver"]
-tests = ["tests", "*/sdserver/tests"]
+onediffusion = ["src/onediffusion", "*/onediffusion/src/onediffusion"]
+tests = ["tests", "*/onediffusion/tests"]
 
 [tool.coverage.report]
 exclude_lines = [

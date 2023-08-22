@@ -17,10 +17,10 @@ The following includes OneDiffusion configuration and excerpt from
 """
 from __future__ import annotations
 
-import sdserver
+import onediffusion
 
 
-class StableDiffusionConfig(sdserver.SDConfig):
+class StableDiffusionConfig(onediffusion.SDConfig):
     """Stable Diffusion is a latent text-to-image diffusion model capable of generating photo-realistic images given any text input.
 
     Refer to [Stable Diffusion page](https://github.com/Stability-AI/stablediffusion) for more information.

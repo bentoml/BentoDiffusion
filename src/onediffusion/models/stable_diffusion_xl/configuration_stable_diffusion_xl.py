@@ -17,10 +17,10 @@ The following includes OpenLLM configuration and excerpt from
 """
 from __future__ import annotations
 
-import sdserver
+import onediffusion
 
 
-class StableDiffusionXLConfig(sdserver.SDConfig):
+class StableDiffusionXLConfig(onediffusion.SDConfig):
     """Databricks’ Dolly is an instruction-following large language model trained on the Databricks
     machine learning platform that is licensed for commercial use.
 

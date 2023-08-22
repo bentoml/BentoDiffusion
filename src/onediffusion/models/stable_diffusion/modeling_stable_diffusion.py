@@ -18,18 +18,18 @@ import logging
 import typing as t
 
 import bentoml
-import sdserver
+import onediffusion
 
 
 if t.TYPE_CHECKING:
     import torch
 else:
-    torch = sdserver.utils.LazyLoader("torch", globals(), "torch")
+    torch = onediffusion.utils.LazyLoader("torch", globals(), "torch")
 
 logger = logging.getLogger(__name__)
 
 
-class StableDiffusion(sdserver.SD["transformers.Pipeline", "transformers.PreTrainedTokenizer"]):
+class StableDiffusion(onediffusion.SD[t.Any, t.Any]):
     __sdserver_internal__ = True
 
     @property

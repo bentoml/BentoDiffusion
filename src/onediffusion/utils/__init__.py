@@ -87,13 +87,13 @@ def non_intrusive_setattr(obj: t.Any, name: str, value: t.Any) -> None:
         _setattr(name, value)
 
 
-DEBUG = sys.flags.dev_mode or (not sys.flags.ignore_environment and bool(os.environ.get("SDSERVERDEVDEBUG")))
+DEBUG = sys.flags.dev_mode or (not sys.flags.ignore_environment and bool(os.environ.get("ONEDIFFUSIONDEVDEBUG")))
 
 
 _LOGGING_CONFIG = _CLI_LOGGING_CONFIG.copy()
 _LOGGING_CONFIG["loggers"].update(
     {
-        "sdserver": {
+        "onediffusion": {
             "level": logging.INFO,
             "handlers": ["bentomlhandler", "defaulthandler"],
             "propagate": False,
@@ -104,15 +104,15 @@ _LOGGING_CONFIG["loggers"].update(
 
 def configure_logging() -> None:
     if get_quiet_mode():
-        _LOGGING_CONFIG["loggers"]["sdserver"]["level"] = logging.ERROR
+        _LOGGING_CONFIG["loggers"]["onediffusion"]["level"] = logging.ERROR
         _LOGGING_CONFIG["loggers"]["bentoml"]["level"] = logging.ERROR
         _LOGGING_CONFIG["root"]["level"] = logging.ERROR
     elif get_debug_mode() or DEBUG:
-        _LOGGING_CONFIG["loggers"]["sdserver"]["level"] = logging.DEBUG
+        _LOGGING_CONFIG["loggers"]["onediffusion"]["level"] = logging.DEBUG
         _LOGGING_CONFIG["loggers"]["bentoml"]["level"] = logging.DEBUG
         _LOGGING_CONFIG["root"]["level"] = logging.DEBUG
     else:
-        _LOGGING_CONFIG["loggers"]["sdserver"]["level"] = logging.INFO
+        _LOGGING_CONFIG["loggers"]["onediffusion"]["level"] = logging.INFO
         _LOGGING_CONFIG["loggers"]["bentoml"]["level"] = logging.INFO
         _LOGGING_CONFIG["root"]["level"] = logging.INFO
 

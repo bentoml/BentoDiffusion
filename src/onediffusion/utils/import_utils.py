@@ -296,4 +296,4 @@ class ModelEnv:
 
     @property
     def module(self) -> LazyLoader:
-        return LazyLoader(self.model_name, globals(), f"sdserver.models.{self.model_name}")
+        return LazyLoader(self.model_name, globals(), f"onediffusion.models.{self.model_name}")

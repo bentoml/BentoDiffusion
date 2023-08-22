@@ -9,7 +9,7 @@ import bentoml
 from bentoml.io import Image, JSON, Multipart
 import bentoml.diffusers_simple
 
-import sdserver
+import onediffusion
 
 model = os.environ.get("ONEDIFFUSION_MODEL", "{__model_name__}")  # model name
 model_name = inflection.underscore(model)
@@ -18,7 +18,7 @@ pipeline = os.environ.get("ONEDIFFUSION_PIPELINE", "{__pipeline__}")  # pipeline
 lora_weights = os.environ.get("ONEDIFFUSION_LORA_WEIGHTS")
 lora_dir = os.environ.get("ONEDIFFUSION_LORA_DIR")
 
-sd_config = sdserver.AutoConfig.for_model(model)
+sd_config = onediffusion.AutoConfig.for_model(model)
 
 model_name = inflection.underscore(model)
 module = getattr(bentoml.diffusers_simple, model_name)

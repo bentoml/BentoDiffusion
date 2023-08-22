@@ -20,13 +20,10 @@ from __future__ import annotations
 
 import functools
 import inspect
-import itertools
 import logging
 import os
-import re
 import sys
 import time
-import traceback
 import typing as t
 
 import click
@@ -37,10 +34,9 @@ import psutil
 from bentoml_cli.utils import BentoMLCommandGroup
 from bentoml_cli.utils import opt_callback
 from simple_di import Provide
-from simple_di import inject
 
 import bentoml
-import sdserver
+import onediffusion
 from bentoml._internal.configuration.containers import BentoMLContainer
 
 from .__about__ import __version__
@@ -50,7 +46,6 @@ from .utils import LazyLoader
 from .utils import LazyType
 from .utils import ModelEnv
 from .utils import analytics
-from .utils import bentoml_cattr
 from .utils import configure_logging
 from .utils import first_not_none
 from .utils import get_debug_mode
@@ -372,7 +367,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
 
     def list_commands(self, ctx: click.Context) -> list[str]:
         if ctx.command.name == "start":
-            return list(sdserver.CONFIG_MAPPING.keys())
+            return list(onediffusion.CONFIG_MAPPING.keys())
 
         return super().list_commands(ctx)
 
@@ -423,7 +418,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
         return t.cast("F[[t.Callable[..., t.Any]], click.Command]", wrapper)
 
 
-@click.group(cls=SDServerCommandGroup, context_settings=_CONTEXT_SETTINGS, name="sdserver")
+@click.group(cls=SDServerCommandGroup, context_settings=_CONTEXT_SETTINGS, name="onediffusion")
 @click.version_option(__version__, "--version", "-v")
 def cli():
     """
@@ -459,13 +454,13 @@ _IGNORED_OPTIONS = {"working_dir", "production", "protocol_version"}
 
 
 if t.TYPE_CHECKING:
-    WrappedServeFunction = ClickFunctionWrapper[t.Concatenate[int, str | None, P], sdserver.SDConfig]
+    WrappedServeFunction = ClickFunctionWrapper[t.Concatenate[int, str | None, P], onediffusion.SDConfig]
 else:
     WrappedServeFunction = t.Any
 
 
 def parse_serve_args(serve_grpc: bool):
-    """Parsing `bentoml serve|serve-grpc` click.Option to be parsed via `sdserver start`"""
+    """Parsing `bentoml serve|serve-grpc` click.Option to be parsed via `onediffusion start`"""
     from bentoml_cli.cli import cli
 
     command = "serve" if not serve_grpc else "serve-grpc"
@@ -475,8 +470,8 @@ def parse_serve_args(serve_grpc: bool):
     )
 
     def decorator(
-        f: t.Callable[t.Concatenate[int, str | None, P], sdserver.SDConfig]
-    ) -> ClickFunctionWrapper[P, sdserver.SDConfig]:
+        f: t.Callable[t.Concatenate[int, str | None, P], onediffusion.SDConfig]
+    ) -> ClickFunctionWrapper[P, onediffusion.SDConfig]:
         serve_command = cli.commands[command]
         # The first variable is the argument bento
         # and the last three are shared default, which we don't need.
@@ -524,7 +519,7 @@ def start_model_command(
 
     configure_logging()
 
-    sd_config = sdserver.AutoConfig.for_model(model_name)
+    sd_config = onediffusion.AutoConfig.for_model(model_name)
     env: ModelEnv = sd_config["env"]
 
     docstring = f"""\
@@ -535,7 +530,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
     command_attrs: dict[str, t.Any] = {
         "name": sd_config["model_name"],
         "context_settings": _context_settings or {},
-        "short_help": f"Start a SDServer for '{model_name}' ('--help' for more details)",
+        "short_help": f"Start a OneDiffusion server for '{model_name}' ('--help' for more details)",
         "help": docstring,
     }
 
@@ -560,7 +555,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         )
 
         @group.command(**command_attrs)
-        def noop() -> sdserver.SDConfig:
+        def noop() -> onediffusion.SDConfig:
             _echo("No GPU available, therefore this command is disabled", fg="red")
             analytics.track_start_init(sd_config)
             return sd_config
@@ -612,7 +607,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
         device: tuple[str, ...] | None,
         fast: bool,
         **attrs: t.Any,
-    ) -> sdserver.SDConfig:
+    ) -> onediffusion.SDConfig:
         config, server_attrs = sd_config.model_validate_click(**attrs)
 
         # Create a new model env to work with the envvar during CLI invocation
@@ -684,7 +679,7 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
 
         sd = t.cast(
              "_BaseAutoSDClass",
-             sdserver[framework_envvar],  # type: ignore (internal API)
+             onediffusion[framework_envvar],  # type: ignore (internal API)
          ).for_model(model_name, **automodel_attrs)
 
         start_env.update(
@@ -745,10 +740,10 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
     return model_start
 
 
-_cached_http = {key: start_model_command(key, _context_settings=_CONTEXT_SETTINGS) for key in sdserver.CONFIG_MAPPING}
+_cached_http = {key: start_model_command(key, _context_settings=_CONTEXT_SETTINGS) for key in onediffusion.CONFIG_MAPPING}
 _cached_grpc = {
     key: start_model_command(key, _context_settings=_CONTEXT_SETTINGS, _serve_grpc=True)
-    for key in sdserver.CONFIG_MAPPING
+    for key in onediffusion.CONFIG_MAPPING
 }
 
 
@@ -773,7 +768,7 @@ start = functools.partial(_start, _serve_grpc=False)
 @cli.command(name="download")
 @click.argument(
     "model_name",
-    type=click.Choice([inflection.dasherize(name) for name in sdserver.CONFIG_MAPPING.keys()]),
+    type=click.Choice([inflection.dasherize(name) for name in onediffusion.CONFIG_MAPPING.keys()]),
 )
 @model_id_option(click)
 @output_option
@@ -804,7 +799,7 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
 
 @cli.command(name="build")
 @click.argument(
-    "model_name", type=click.Choice([inflection.dasherize(name) for name in sdserver.CONFIG_MAPPING.keys()])
+    "model_name", type=click.Choice([inflection.dasherize(name) for name in onediffusion.CONFIG_MAPPING.keys()])
 )
 @model_id_option(click)
 @pipeline_option(click)
@@ -838,7 +833,7 @@ def build(
         if overwrite:
             _echo(f"Overwriting existing Bento for {model_name}.", fg="yellow")
 
-    bento, _previously_built = sdserver.build(
+    bento, _previously_built = onediffusion.build(
         model_name,
         __cli__=True,
         model_id=model_id,
@@ -864,9 +859,6 @@ def build(
                 + f"    $ bentoml push {bento.tag}\n"
                 + "* Containerize your Bento with `bentoml containerize`:\n"
                 + f"    $ bentoml containerize {bento.tag}\n"
-                + "    Tip: To enable additional BentoML feature for 'containerize', "
-                + "use '--enable-features=FEATURE[,FEATURE]' "
-                + "[see 'bentoml containerize -h' for more advanced usage]\n",
                 fg="blue",
             )
     elif output == "json":

@@ -28,7 +28,7 @@ import inflection
 import orjson
 from click import ParamType
 
-import sdserver
+import onediffusion
 
 
 if t.TYPE_CHECKING:
@@ -49,7 +49,7 @@ def attrs_to_options(
     model_name: str,
     typ: type[t.Any] | None = None,
     suffix_generation: bool = False,
-) -> F[..., F[..., sdserver.SDConfig]]:
+) -> F[..., F[..., onediffusion.SDConfig]]:
     ...
 
 
@@ -341,13 +341,13 @@ def is_mapping(field_type: type) -> bool:
         bool: true when the field is a dict-like object, false otherwise.
     """
     # Early out for standard containers.
-    if sdserver.utils.lenient_issubclass(field_type, t.Mapping):
+    if onediffusion.utils.lenient_issubclass(field_type, t.Mapping):
         return True
     # for everything else or when the typing is more complex, check its origin
     origin = t.get_origin(field_type)
     if origin is None:
         return False
-    return sdserver.utils.lenient_issubclass(origin, t.Mapping)
+    return onediffusion.utils.lenient_issubclass(origin, t.Mapping)
 
 
 def is_container(field_type: type) -> bool:
@@ -364,13 +364,13 @@ def is_container(field_type: type) -> bool:
     if field_type in (str, bytes):
         return False
     # Early out for standard containers: list, tuple, range
-    if sdserver.utils.lenient_issubclass(field_type, t.Container):
+    if onediffusion.utils.lenient_issubclass(field_type, t.Container):
         return True
     origin = t.get_origin(field_type)
     # Early out for non-typing objects
     if origin is None:
         return False
-    return sdserver.utils.lenient_issubclass(origin, t.Container)
+    return onediffusion.utils.lenient_issubclass(origin, t.Container)
 
 
 def parse_container_args(field_type: type[t.Any]) -> ParamType | tuple[ParamType]:
@@ -416,7 +416,7 @@ def parse_single_arg(arg: type) -> ParamType:
     # For containers and nested models, we use JSON
     if is_container(arg):
         return JsonType()
-    if sdserver.utils.lenient_issubclass(arg, bytes):
+    if onediffusion.utils.lenient_issubclass(arg, bytes):
         return BytesType()
     return arg
 
@@ -441,7 +441,7 @@ class JsonType(ParamType):
         self.should_load = should_load
 
     def convert(self, value: t.Any, param: click.Parameter | None, ctx: click.Context | None) -> t.Any:
-        if sdserver.utils.LazyType[t.Mapping[str, str]](t.Mapping).isinstance(value) or not self.should_load:
+        if onediffusion.utils.LazyType[t.Mapping[str, str]](t.Mapping).isinstance(value) or not self.should_load:
             return value
         try:
             return orjson.loads(value)

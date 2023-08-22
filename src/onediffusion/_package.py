@@ -26,14 +26,13 @@ import fs
 import inflection
 
 import bentoml
-import sdserver
+import onediffusion
 from bentoml._internal.bento.build_config import DockerOptions
 from bentoml._internal.bento.build_config import PythonOptions
 from bentoml._internal.configuration import get_debug_mode
 from bentoml._internal.frameworks.diffusers_runners.utils import get_model_or_download
 
 from .utils import ModelEnv
-from .utils import codegen
 from .utils import first_not_none
 from .utils import is_torch_available
 from .utils import pkg
@@ -79,7 +78,7 @@ def build_editable(path: str) -> str | None:
 
 
 def construct_python_options(
-    sd: sdserver.SD[t.Any, t.Any],
+    sd: onediffusion.SD[t.Any, t.Any],
     sd_fs: FS,
     extra_dependencies: tuple[str, ...] | None = None,
 ) -> PythonOptions:
@@ -111,7 +110,7 @@ def construct_python_options(
 
 
 def construct_docker_options(
-    sd: sdserver.SD[t.Any, t.Any],
+    sd: onediffusion.SD[t.Any, t.Any],
     _: FS,
     workers_per_resource: int | float,
 ) -> DockerOptions:
@@ -172,7 +171,7 @@ def _build_bento(
     bento_tag: bentoml.Tag,
     service_name: str,
     sd_fs: FS,
-    sd: sdserver.SD[t.Any, t.Any],
+    sd: onediffusion.SD[t.Any, t.Any],
     workers_per_resource: int | float,
     extra_dependencies: tuple[str, ...] | None = None,
 ) -> bentoml.Bento:
@@ -218,7 +217,7 @@ def build(
     current_model_envvar = os.environ.pop("ONEDIFFUSION_MODEL", None)
     current_model_id_envvar = os.environ.pop("ONEDIFFUSION_MODEL_ID", None)
 
-    sd_config = sdserver.AutoConfig.for_model(model_name)
+    sd_config = onediffusion.AutoConfig.for_model(model_name)
 
     logger.info("Packing '%s' into a Bento with kwargs=%s...", model_name, attrs)
 
@@ -230,7 +229,7 @@ def build(
         framework_envvar = sd_config["env"]["framework_value"]
         sd = t.cast(
             "_BaseAutoSDClass",
-            sdserver[framework_envvar],  # type: ignore (internal API)
+            onediffusion[framework_envvar],  # type: ignore (internal API)
         ).for_model(
             model_name,
             model_id=model_id,

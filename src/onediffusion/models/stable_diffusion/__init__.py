@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import typing as t
 
-import sdserver
+import onediffusion
 
 
 _import_structure = {
@@ -24,9 +24,9 @@ _import_structure = {
 }
 
 try:
-    if not sdserver.utils.is_torch_available():
-        raise sdserver.exceptions.MissingDependencyError
-except sdserver.exceptions.MissingDependencyError:
+    if not onediffusion.utils.is_torch_available():
+        raise onediffusion.exceptions.MissingDependencyError
+except onediffusion.exceptions.MissingDependencyError:
     pass
 else:
     _import_structure["modeling_stable_diffusion"] = ["StableDiffusion"]
@@ -37,9 +37,9 @@ if t.TYPE_CHECKING:
     from .configuration_stable_diffusion import StableDiffusionConfig as StableDiffusionConfig
 
     try:
-        if not sdserver.utils.is_torch_available():
-            raise sdserver.exceptions.MissingDependencyError
-    except sdserver.exceptions.MissingDependencyError:
+        if not onediffusion.utils.is_torch_available():
+            raise onediffusion.exceptions.MissingDependencyError
+    except onediffusion.exceptions.MissingDependencyError:
         pass
     else:
         #from .modeling_dolly_v2 import DollyV2 as DollyV2
@@ -47,6 +47,6 @@ if t.TYPE_CHECKING:
 else:
     import sys
 
-    sys.modules[__name__] = sdserver.utils.LazyModule(
+    sys.modules[__name__] = onediffusion.utils.LazyModule(
         __name__, globals()["__file__"], _import_structure, module_spec=__spec__
     )

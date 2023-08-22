@@ -31,7 +31,7 @@ import inflection
 import orjson
 
 import bentoml
-import sdserver
+import onediffusion
 from bentoml._internal.models.model import ModelSignature
 from bentoml._internal.types import ModelSignatureDict
 
@@ -59,8 +59,8 @@ if t.TYPE_CHECKING:
     class SDRunner(bentoml.Runner):
         __doc__: str
         __module__: str
-        sd: sdserver.SD[t.Any, t.Any]
-        config: sdserver.SDConfig
+        sd: onediffusion.SD[t.Any, t.Any]
+        config: onediffusion.SDConfig
         sd_type: str
         identifying_params: dict[str, t.Any]
 
@@ -93,7 +93,7 @@ _reserved_namespace = {"config_class", "model", "import_kwargs"}
 class SDInterface(ABC):
     """This defines the loose contract for all openllm.LLM implementations."""
 
-    config_class: type[sdserver.SDConfig]
+    config_class: type[onediffusion.SDConfig]
     """The config class to use for this LLM. If you are creating a custom LLM, you must specify this class."""
 
     @property
@@ -150,7 +150,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
         implementation = "pt"
 
         cls.__sd_implementation__ = implementation
-        config_class = sdserver.AutoConfig.infer_class_from_name(prefix_class_name_config)
+        config_class = onediffusion.AutoConfig.infer_class_from_name(prefix_class_name_config)
 
         if "__sdserver_internal__" in cd:
             if "config_class" not in cd:
@@ -182,7 +182,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
         cls,
         model_id: str | None = None,
         pipeline: str | None = None,
-        sd_config: sdserver.SDConfig | None = None,
+        sd_config: onediffusion.SDConfig | None = None,
         *args: t.Any,
         **attrs: t.Any,
     ) -> SD[_M, _T]:
@@ -198,7 +198,7 @@ class SD(SDInterface, t.Generic[_M, _T]):
         self,
         model_id: str | None = None,
         pipeline: str | None = None,
-        sd_config: sdserver.SDConfig | None = None,
+        sd_config: onediffusion.SDConfig | None = None,
         *args: t.Any,
         **attrs: t.Any,
     ):

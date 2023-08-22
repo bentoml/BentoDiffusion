@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-SDServer
-=======
+OneDiffusion
+============
 
 An open platform for operating diffusion models in production. Fine-tune, serve,
 deploy, and monitor any diffusion models with ease.
@@ -103,7 +103,7 @@ else:
         module_spec=__spec__,
         extra_objects={
             "__version__": __version__,
-            # The below is a special mapping that allows sdserver to
+            # The below is a special mapping that allows OneDIffusion to
             # be used as a dictionary.  This is purely for convenience
             # sake, and should not be used in performance critcal
             # code. This is also not considered as a public API.
