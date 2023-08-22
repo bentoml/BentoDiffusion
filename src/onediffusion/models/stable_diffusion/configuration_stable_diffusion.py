@@ -13,7 +13,7 @@
 # limitations under the License.
 """
 The following includes OneDiffusion configuration and excerpt from
-[instruct_pipeline.py](https://huggingface.co/databricks/dolly-v2-3b/blob/main/instruct_pipeline.py)
+[Stable Diffusion repository](https://github.com/Stability-AI/stablediffusion)
 """
 from __future__ import annotations
 

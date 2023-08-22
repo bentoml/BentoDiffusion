@@ -369,7 +369,7 @@ class SDConfig:
     """
     ``onediffusion.SDConfig`` is somewhat a hybrid combination between the performance of `attrs` with the
     easy-to-use interface that pydantic offer. It lives in between where it allows users to quickly formulate
-    a SDConfig for any LLM without worrying too much about performance. It does a few things:
+    a SDConfig for any diffusion model without worrying too much about performance. It does a few things:
 
     - Automatic environment conversion: Each fields will automatically be provisioned with an environment
         variable, make it easy to work with ahead-of-time or during serving time
@@ -383,41 +383,24 @@ class SDConfig:
     > which means SDConfig will actually generate subclass to have attrs-compatible API, so that the subclass
     > can be written as any normal Python class.
 
-    To directly configure GenerationConfig for any given LLM, create a GenerationConfig under the subclass:
-
-    ```python
-    class FlanT5Config(onediffusion.SDConfig):
-        class GenerationConfig:
-            temperature: float = 0.75
-            max_new_tokens: int = 3000
-            top_k: int = 50
-            top_p: float = 0.4
-            repetition_penalty = 1.0
-    ```
-    By doing so, onediffusion.SDConfig will create a compatible GenerationConfig attrs class that can be converted
-    to ``transformers.GenerationConfig``. These attribute can be accessed via ``SDConfig.generation_config``.
-
     By default, all SDConfig must provide a __config__ with 'default_id' and 'model_ids'.
 
     All other fields are optional, and will be use default value if not set.
 
     ```python
-    class FalconConfig(onediffusion.SDConfig):
+    class StableDiffusionConfig(onediffusion.SDConfig):
+
         __config__ = {
-            "name_type": "lowercase",
-            "trust_remote_code": True,
-            "requires_gpu": True,
             "timeout": 3600000,
-            "url": "https://falconllm.tii.ae/",
-            "requirements": ["einops", "xformers", "safetensors"],
-            # NOTE: The below are always required
-            "default_id": "tiiuae/falcon-7b",
+            "url": "https://github.com/Stability-AI/stablediffusion",
+            "default_id": "stabilityai/stable-diffusion-2",
             "model_ids": [
-                "tiiuae/falcon-7b",
-                "tiiuae/falcon-40b",
-                "tiiuae/falcon-7b-instruct",
-                "tiiuae/falcon-40b-instruct",
+                "CompVis/stable-diffusion-v1-4",
+                "runwayml/stable-diffusion-v1-5",
+                "stabilityai/stable-diffusion-2",
             ],
+            "default_pipeline": "text2img",
+            "pipelines": ["text2img", "img2img"],
         }
     ```
     """
@@ -437,7 +420,7 @@ class SDConfig:
     if t.TYPE_CHECKING:
         # NOTE: public attributes to override
         __config__: ModelSettings | None = Field(None)
-        """Internal configuration for this LLM model. Each of the field in here will be populated
+        """Internal configuration for this diffusion model. Each of the field in here will be populated
         and prefixed with __sdserver_<value>__"""
 
         """Users can override this subclass of any given SDConfig to provide GenerationConfig
@@ -529,7 +512,7 @@ class SDConfig:
         """A ModelEnv instance for this SDConfig."""
 
         __sdserver_timeout__: int = Field(36e6)
-        """The default timeout to be set for this given LLM."""
+        """The default timeout to be set for this given diffusion model."""
 
         __sdserver_workers_per_resource__: int | float = Field(1)
         """The number of workers per resource. This is used to determine the number of workers to use for this model.
@@ -673,7 +656,7 @@ class SDConfig:
             raise ForbiddenAttributeError(
                 f"{attr} should not be set during runtime "
                 f"as these value will be reflected during runtime. "
-                f"Instead, you can create a custom LLM subclass {self.__class__.__name__}."
+                f"Instead, you can create a custom SD subclass {self.__class__.__name__}."
             )
 
         super().__setattr__(attr, value)
@@ -716,7 +699,7 @@ class SDConfig:
         This method is purely for convenience, and should not be used for performance critical code.
         """
         if not isinstance(item, str):
-            raise TypeError(f"LLM only supports string indexing, not {item.__class__.__name__}")
+            raise TypeError(f"SD only supports string indexing, not {item.__class__.__name__}")
         if item in _reserved_namespace:
             raise ForbiddenAttributeError(
                 f"'{item}' is a reserved namespace for {self.__class__} and should not be access nor modified."

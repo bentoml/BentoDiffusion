@@ -32,8 +32,6 @@ if t.TYPE_CHECKING:
     from collections import _odict_keys
     from collections import _odict_values
 
-    from ..._llm import LLMRunner
-
     ConfigModelOrderedDict = OrderedDict[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
     ConfigModelKeysView = _odict_keys[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
     ConfigModelValuesView = _odict_values[type[onediffusion.SDConfig], type[onediffusion.SD[t.Any, t.Any]]]
@@ -92,12 +90,12 @@ class _BaseAutoSDClass:
         sd_config: onediffusion.SDConfig | None = None,
         ensure_available: bool = False,
         **attrs: t.Any,
-    ) -> onediffusion.SD[t.Any, t.Any] | tuple[openllm.LLM[t.Any, t.Any], dict[str, t.Any]]:
-        """The lower level API for creating a LLM instance.
+    ) -> onediffusion.SD[t.Any, t.Any] | tuple[onediffusion.SD[t.Any, t.Any], dict[str, t.Any]]:
+        """The lower level API for creating a OneDiffusion instance.
 
         ```python
-        >>> import openllm
-        >>> llm = openllm.AutoLLM.for_model("flan-t5")
+        >>> import onediffusion
+        >>> sd = onediffusion.AutoSD.for_model("stable-diffusion")
         ```
         """
         # order matters here
@@ -115,7 +113,7 @@ class _BaseAutoSDClass:
                 # The rest of kwargs is now passed to config
                 sd_config = AutoConfig.for_model(model_name, **attrs)
                 attrs = sd_config.__sdserver_extras__
-            # the rest of attrs will be saved to __openllm_extras__
+            # the rest of attrs will be saved to __sdserver_extras__
             sd = cls._model_mapping[type(sd_config)].from_pretrained(
                 model_id,
                 pipeline,
@@ -138,27 +136,27 @@ class _BaseAutoSDClass:
                 return sd
             return sd, to_runner_attrs
         raise ValueError(
-            f"Unrecognized configuration class {sd_config.__class__} for this kind of AutoLLM: {cls.__name__}.\n"
-            f"LLM type should be one of {', '.join(c.__name__ for c in cls._model_mapping.keys())}."
+            f"Unrecognized configuration class {sd_config.__class__} for this kind of AutoSD: {cls.__name__}.\n"
+            f"SD type should be one of {', '.join(c.__name__ for c in cls._model_mapping.keys())}."
         )
 
 
     @classmethod
-    def register(cls, config_class: type[openllm.LLMConfig], llm_class: type[openllm.LLM[t.Any, t.Any]]):
+    def register(cls, config_class: type[onediffusion.SDConfig], sd_class: type[onediffusion.SD[t.Any, t.Any]]):
         """
         Register a new model for this class.
 
         Args:
             config_class: The configuration corresponding to the model to register.
-            llm_class: The runnable to register.
+            sd_class: The runnable to register.
         """
-        if hasattr(llm_class, "config_class") and llm_class.config_class is not config_class:
+        if hasattr(sd_class, "config_class") and sd_class.config_class is not config_class:
             raise ValueError(
                 "The model class you are passing has a `config_class` attribute that is not consistent with the "
-                f"config class you passed (model has {llm_class.config_class} and you passed {config_class}. Fix "
+                f"config class you passed (model has {sd_class.config_class} and you passed {config_class}. Fix "
                 "one of those so they match!"
             )
-        cls._model_mapping.register(config_class, llm_class)
+        cls._model_mapping.register(config_class, sd_class)
 
 
 def getattribute_from_module(module: types.ModuleType, attr: t.Any) -> t.Any:
@@ -230,8 +228,8 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
 
     @t.overload
     def get(
-        self, key: type[openllm.LLMConfig], default: t.Any, mapping_type: t.Literal["default"] = "default"
-    ) -> type[openllm.LLM[t.Any, t.Any]]:
+        self, key: type[onediffusion.SDConfig], default: t.Any, mapping_type: t.Literal["default"] = "default"
+    ) -> type[onediffusion.SD[t.Any, t.Any]]:
         ...
 
     @t.overload
@@ -240,10 +238,10 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
 
     def get(
         self,
-        key: str | type[openllm.LLMConfig],
+        key: str | type[onediffusion.SDConfig],
         default: t.Any,
         mapping_type: t.Literal["default", "name2config", "name2model"] = "default",
-    ) -> str | type[openllm.LLM[t.Any, t.Any]]:
+    ) -> str | type[onediffusion.SD[t.Any, t.Any]]:
         _supported = {"default", "name2model", "name2config"}
         if mapping_type not in _supported:
             raise RuntimeError(f"Unknown mapping type {mapping_type} (supported: {_supported})")
@@ -253,8 +251,8 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
                 # we check for lenient_issubclass below, but pyright is too dumb to understand
                 assert not isinstance(key, str)
             else:
-                if not openllm.utils.lenient_issubclass(key, openllm.LLMConfig):
-                    raise KeyError(f"Key must be a type of 'openllm.LLMConfig', got {key} instead.")
+                if not onediffusion.utils.lenient_issubclass(key, onediffusion.SDConfig):
+                    raise KeyError(f"Key must be a type of 'onediffusion.SDConfig', got {key} instead.")
             try:
                 return self.__getitem__(key)
             except KeyError:
@@ -307,9 +305,9 @@ class _LazyAutoMapping(ConfigModelOrderedDict):
         if hasattr(key, "__name__") and key.__name__ in self._reverse_config_mapping:
             model_type = self._reverse_config_mapping[key.__name__]
             if model_type in self._model_mapping.keys():
-                raise ValueError(f"'{key}' is already used by a OpenLLM model.")
+                raise ValueError(f"'{key}' is already used by a OneDiffusion model.")
 
         self._extra_content[key] = value
 
 
-__all__ = ["_BaseAutoLLMClass", "_LazyAutoMapping"]
+__all__ = ["_BaseAutoSDClass", "_LazyAutoMapping"]

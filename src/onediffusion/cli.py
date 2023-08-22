@@ -858,7 +858,7 @@ def build(
                 + "* Push to BentoCloud with `bentoml push`:\n"
                 + f"    $ bentoml push {bento.tag}\n"
                 + "* Containerize your Bento with `bentoml containerize`:\n"
-                + f"    $ bentoml containerize {bento.tag}\n"
+                + f"    $ bentoml containerize {bento.tag}\n",
                 fg="blue",
             )
     elif output == "json":
