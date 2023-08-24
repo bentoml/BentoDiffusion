@@ -16,12 +16,21 @@ OneDiffusion is an open-source one-stop shop for facilitating the deployment of 
 
 Key features include:
 
-- 🌐 **Broad compatibility**: Support both pretrained and LoRA-adapted diffusion models, providing flexibility in choosing and deploying the appropriate model for various image generation tasks. It currently supports Stable Diffusion (v1.4, v1.5 and v2.0) and Stable Diffusion XL (v1.0) models. Support for more models (for example, ControlNet) is on the way.
-- 💪 **Optimized performance and scalability**: Apply the best in class optimizations for serving diffusion models on your behalf.
+- 🌐 **Broad compatibility**: Support both pretrained and LoRA-adapted diffusion models, providing flexibility in choosing and deploying the appropriate model for various image generation tasks.
+- 💪 **Optimized performance and scalability**: Automatically select the best optimizations like half-precision weights or xFormers to achieve best inference speed out of the box.
 - ⌛️ **Dynamic LoRA adapter loading**: Dynamically load and unload LoRA adapters on every request, providing greater adaptability and ensuring the models remain responsive to changing inputs and conditions.
 - 🍱 **First-class support for BentoML**: Seamless integration with the [BentoML](https://github.com/bentoml/BentoML) ecosystem, allowing you to build Bentos and push them to [BentoCloud](https://www.bentoml.com/cloud). 
 
 OneDiffusion is designed for AI application developers who require a robust and flexible platform for deploying diffusion models in production. The platform offers tools and features to fine-tune, serve, deploy, and monitor these models effectively, streamlining the end-to-end workflow for diffusion model deployment.
+
+## Supported models
+
+Currently, OneDiffusion supports the following models:
+
+- Stable Diffusion v1.4, v1.5 and v2.0
+- Stable Diffusion XL v1.0
+
+More models (for example, ControlNet and DeepFloyd IF) will be added soon.
 
 ## Get started
 
@@ -44,22 +53,23 @@ $ onediffusion -h
 
 Usage: onediffusion [OPTIONS] COMMAND [ARGS]...
 
- ██████╗ ███╗   ██╗███████╗██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗
-██╔═══██╗████╗  ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║
-██║   ██║██╔██╗ ██║█████╗  ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║
-██║   ██║██║╚██╗██║██╔══╝  ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║
-╚██████╔╝██║ ╚████║███████╗██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║
- ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
- 
+       ██████╗ ███╗   ██╗███████╗██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗
+      ██╔═══██╗████╗  ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║
+      ██║   ██║██╔██╗ ██║█████╗  ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║
+      ██║   ██║██║╚██╗██║██╔══╝  ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║
+      ╚██████╔╝██║ ╚████║███████╗██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║
+       ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+          
           An open platform for operating diffusion models in production.
           Fine-tune, serve, deploy, and monitor any diffusion models with ease.
-
+          
 
 Options:
   -v, --version  Show the version and exit.
   -h, --help     Show this message and exit.
 
 Commands:
+  build     Package a given models into a Bento.
   download  Setup diffusion model interactively.
   start     Start any diffusion models as a REST server.
 ```
@@ -95,6 +105,12 @@ By default, OneDiffusion uses `stabilityai/stable-diffusion-2` to start the serv
 
 ```bash
 onediffusion start stable-diffusion --model-id runwayml/stable-diffusion-v1-5
+```
+
+To specify another pipeline, use the `--pipeline` option as below. The `img2img` pipeline allows you to modify images based on a given prompt and image.
+
+```bash
+onediffusion start stable-diffusion --pipeline "img2img"
 ```
 
 OneDiffusion downloads the models to the BentoML local Model Store if they have not been registered before. To view your models, install BentoML first with `pip install bentoml` and then run:
@@ -160,7 +176,7 @@ Alternatively, dynamically load LoRA weights by adding the `lora_weights` field:
 }
 ```
 
-Example output:
+By specifying the path of LoRA weights at runtime, you can influence model outputs dynamically. Even with identical prompts, the application of different LoRA weights can yield vastly different results. Example output (oil painting vs. pixel):
 
 ![dynamic loading](/example-images/dynamic-loading.gif)
 
@@ -202,7 +218,7 @@ onediffusion build stable-diffusion-xl
 
 To specify the model to be packaged into the Bento, use `--model-id`. Otherwise, OneDiffusion packages the default model into the Bento. If the model does not exist locally, OneDiffusion downloads the model automatically.
 
-Once your Bento is ready, you can push it to [BentoCloud](https://www.bentoml.com/cloud) or [Yatai](https://github.com/bentoml/Yatai).
+Once your Bento is ready, you can push it to [BentoCloud](https://www.bentoml.com/cloud).
 
 ## Roadmap
 
