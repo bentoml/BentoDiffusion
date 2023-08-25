@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Utilities function for SDServer. User can import these function for convenience, but
+Utilities function for OneDiffusion. User can import these function for convenience, but
 we won't ensure backward compatibility for these functions. So use with caution.
 """
 from __future__ import annotations as _annotations

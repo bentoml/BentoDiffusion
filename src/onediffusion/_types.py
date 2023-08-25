@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Types definition for SDServer.
+Types definition for OneDiffusion.
 
 Note that this module SHOULD NOT BE IMPORTED DURING RUNTIME, as this serve only for typing purposes.
 It will raises a RuntimeError if this is imported eagerly.

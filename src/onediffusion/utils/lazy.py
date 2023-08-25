@@ -22,14 +22,14 @@ import types
 import typing as t
 
 from ..exceptions import ForbiddenAttributeError
-from ..exceptions import SDServerException
+from ..exceptions import OneDiffusionException
 
 
-class UsageNotAllowedError(SDServerException):
+class UsageNotAllowedError(OneDiffusionException):
     """Raised when LazyModule.__getitem__ is forbidden."""
 
 
-class MissingAttributesError(SDServerException):
+class MissingAttributesError(OneDiffusionException):
     """Raised when given keys is not available in LazyModule special mapping."""
 
 
