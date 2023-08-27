@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Telemetry related for SDServer tracking.
+Telemetry related for OneDiffusion tracking.
 
-Users can disable this with SDSERVER_DO_NOT_TRACK envvar.
+Users can disable this with ONEDIFFUSION_DO_NOT_TRACK envvar.
 """
 from __future__ import annotations
 
@@ -38,9 +38,9 @@ from ..__about__ import __version__
 ENV_VARS_TRUE_VALUES = {"1", "ON", "YES", "TRUE"}
 
 # This variable is a proxy that will control BENTOML_DO_NOT_TRACK
-SDSERVER_DO_NOT_TRACK = "SDSERVER_DO_NOT_TRACK"
+ONEDIFFUSION_DO_NOT_TRACK = "ONEDIFFUSION_DO_NOT_TRACK"
 
-DO_NOT_TRACK = os.environ.get(SDSERVER_DO_NOT_TRACK, str(False)).upper()
+DO_NOT_TRACK = os.environ.get(ONEDIFFUSION_DO_NOT_TRACK, str(False)).upper()
 
 
 @functools.lru_cache(maxsize=1)
@@ -66,7 +66,7 @@ def set_bentoml_tracking():
 
 
 @attr.define
-class SDServerCliEvent(_internal_analytics.schemas.EventMeta):
+class OneDiffusionCliEvent(_internal_analytics.schemas.EventMeta):
     cmd_group: str
     cmd_name: str
     onediffusion_version: str = __version__

@@ -64,6 +64,7 @@ dependencies = [
 ]
 
 [project.urls]
+Chat = "https://l.bentoml.com/join-openllm-discord"
 Documentation = "https://github.com/BentoML/OneDiffusion#readme"
 Issues = "https://github.com/BentoML/OneDiffusion/issues"
 Source = "https://github.com/BentoML/OneDiffusion"

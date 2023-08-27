@@ -40,7 +40,7 @@ import onediffusion
 from bentoml._internal.configuration.containers import BentoMLContainer
 
 from .__about__ import __version__
-from .exceptions import SDServerException
+from .exceptions import OneDiffusionException
 from .utils import DEBUG
 from .utils import LazyLoader
 from .utils import LazyType
@@ -102,7 +102,7 @@ class NargsOptions(cog.GroupedOption):
     def __init__(self, *args: t.Any, **attrs: t.Any):
         nargs = attrs.pop("nargs", -1)
         if nargs != -1:
-            raise SDServerException(f"'nargs' is set, and must be -1 instead of {nargs}")
+            raise OneDiffusionException(f"'nargs' is set, and must be -1 instead of {nargs}")
         super(NargsOptions, self).__init__(*args, **attrs)
         self._prev_parser_process: t.Callable[[t.Any, click.parser.ParsingState], None] | None = None
         self._nargs_parser: click.parser.Option | None = None
@@ -257,7 +257,7 @@ def workers_per_resource_option(factory: t.Any, build: bool = False):
 
 
 
-class SDServerCommandGroup(BentoMLCommandGroup):
+class OneDiffusionCommandGroup(BentoMLCommandGroup):
     NUMBER_OF_COMMON_PARAMS = 3
 
     @staticmethod
@@ -278,7 +278,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
             "--do-not-track",
             is_flag=True,
             default=False,
-            envvar=analytics.SDSERVER_DO_NOT_TRACK,
+            envvar=analytics.ONEDIFFUSION_DO_NOT_TRACK,
             help="Do not send usage info",
         )
         @functools.wraps(f)
@@ -315,7 +315,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
 
             with analytics.set_bentoml_tracking():
                 assert group.name is not None, "group.name should not be None"
-                event = analytics.SDServerCliEvent(cmd_group=group.name, cmd_name=command_name)
+                event = analytics.OneDiffusionCliEvent(cmd_group=group.name, cmd_name=command_name)
                 try:
                     return_value = func(*args, **attrs)
                     duration_in_ms = (time.time_ns() - start_time) / 1e6
@@ -345,7 +345,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
         def wrapper(*args: P.args, **attrs: P.kwargs) -> t.Any:
             try:
                 return func(*args, **attrs)
-            except SDServerException as err:
+            except OneDiffusionException as err:
                 raise click.ClickException(
                     click.style(f"[{group.name}] '{command_name}' failed: " + err.message, fg="red")
                 ) from err
@@ -418,7 +418,7 @@ class SDServerCommandGroup(BentoMLCommandGroup):
         return t.cast("F[[t.Callable[..., t.Any]], click.Command]", wrapper)
 
 
-@click.group(cls=SDServerCommandGroup, context_settings=_CONTEXT_SETTINGS, name="onediffusion")
+@click.group(cls=OneDiffusionCommandGroup, context_settings=_CONTEXT_SETTINGS, name="onediffusion")
 @click.version_option(__version__, "--version", "-v")
 def cli():
     """
@@ -435,7 +435,7 @@ def cli():
     """
 
 
-@cli.group(cls=SDServerCommandGroup, context_settings=_CONTEXT_SETTINGS, name="start")
+@cli.group(cls=OneDiffusionCommandGroup, context_settings=_CONTEXT_SETTINGS, name="start")
 def start_cli():
     """
     Start any diffusion models as a REST server.

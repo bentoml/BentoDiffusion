@@ -37,7 +37,7 @@ from bentoml._internal.types import ModelSignatureDict
 
 from .exceptions import ForbiddenAttributeError
 from .exceptions import GpuNotAvailableError
-from .exceptions import SDServerException
+from .exceptions import OneDiffusionException
 from .utils import DEBUG
 from .utils import LazyLoader
 from .utils import ModelEnv

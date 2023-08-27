@@ -12,31 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Base exceptions for SDServer. This extends BentoML exceptions.
+Base exceptions for OneDiffusion. This extends BentoML exceptions.
 """
 from __future__ import annotations
 
 import bentoml
 
 
-class SDServerException(bentoml.exceptions.BentoMLException):
-    """Base class for all SDServer exceptions. This extends BentoMLException."""
+class OneDiffusionException(bentoml.exceptions.BentoMLException):
+    """Base class for all OneDiffusion exceptions. This extends BentoMLException."""
 
 
-class GpuNotAvailableError(SDServerException):
+class GpuNotAvailableError(OneDiffusionException):
     """Raised when there is no GPU available in given system."""
 
 
-class ValidationError(SDServerException):
+class ValidationError(OneDiffusionException):
     """Raised when a validation fails."""
 
 
-class ForbiddenAttributeError(SDServerException):
+class ForbiddenAttributeError(OneDiffusionException):
     """Raised when using an _internal field."""
 
 
-class MissingAnnotationAttributeError(SDServerException):
-    """Raised when a field under sdserver.SDConfig is missing annotations."""
+class MissingAnnotationAttributeError(OneDiffusionException):
+    """Raised when a field under onediffusion.SDConfig is missing annotations."""
 
 
 class MissingDependencyError(BaseException):
