@@ -200,6 +200,8 @@ def build(
     *,
     model_id: str | None = None,
     pipeline: str | None = None,
+    bento_name: str | None = None,
+    bento_version: str | None = None,
     _extra_dependencies: tuple[str, ...] | None = None,
     _workers_per_resource: int | float | None = None,
     _overwrite_existing_bento: bool = False,
@@ -271,7 +273,9 @@ def build(
                 content = content.replace(r"{__pipeline__}", sd.pipeline)
                 sd_fs.writetext(target_service_name, content)
 
-            bento_tag = bentoml.Tag.from_taglike(f"{sd.sd_type}-service:{model_version}")
+            name = bento_name or f"{framework_envvar}-{sd.sd_type}-{sd.pipeline}"
+            version = bento_version or model_version
+            bento_tag = bentoml.Tag(name=name, version=version)
             try:
                 bento = bentoml.get(bento_tag)
                 if _overwrite_existing_bento:

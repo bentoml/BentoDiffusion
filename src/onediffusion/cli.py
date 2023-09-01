@@ -804,13 +804,31 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
 @model_id_option(click)
 @pipeline_option(click)
 @output_option
-@click.option("--overwrite", is_flag=True, help="Overwrite existing Bento for given diffusion model if it already exists.")
+@click.option(
+    "--overwrite",
+    is_flag=True,
+    help="Overwrite existing Bento for given diffusion model if it already exists."
+)
+@click.option(
+    "--name",
+    type=click.STRING,
+    default=None,
+    help="Optional bento name. If not provide, OneDiffusion will automatically generate one",
+)
+@click.option(
+    "--version",
+    type=click.STRING,
+    default=None,
+    help="Optional bento version. If not provided, the default model version will be used",
+)
 @workers_per_resource_option(click, build=True)
 def build(
     model_name: str,
     model_id: str | None,
     pipeline: str | None,
     overwrite: bool,
+    name: str,
+    version: str,
     output: OutputLiteral,
     workers_per_resource: float | None,
 ):
@@ -838,6 +856,8 @@ def build(
         __cli__=True,
         model_id=model_id,
         pipeline=pipeline,
+        bento_name=name,
+        bento_version=version,
         _workers_per_resource=workers_per_resource,
         _overwrite_existing_bento=overwrite,
     )
