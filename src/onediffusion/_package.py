@@ -304,7 +304,7 @@ def build(
                         file_name = os.path.basename(path)
                         target_path = os.path.join("lora", file_name)
                         with fs.open_fs(dir_path) as src_fs:
-                            fs.copy.copy(src_fs, file_name, sd_fs, target_path)
+                            fs.copy.copy_file(src_fs, file_name, sd_fs, target_path)
 
             name = bento_name or f"{framework_envvar}-{sd.sd_type}-{sd.pipeline}"
             version = bento_version or model_version
