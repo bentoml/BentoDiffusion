@@ -15,8 +15,8 @@ model = os.environ.get("ONEDIFFUSION_MODEL", "{__model_name__}")  # model name
 model_name = inflection.underscore(model)
 model_id = os.environ.get("ONEDIFFUSION_MODEL_ID", "{__model_id__}")  # model id
 pipeline = os.environ.get("ONEDIFFUSION_PIPELINE", "{__pipeline__}")  # pipeline
-lora_weights = os.environ.get("ONEDIFFUSION_LORA_WEIGHTS")
-lora_dir = os.environ.get("ONEDIFFUSION_LORA_DIR")
+lora_weights = os.environ.get("ONEDIFFUSION_LORA_WEIGHTS", "{__lora_weights__}")
+lora_dir = os.environ.get("ONEDIFFUSION_LORA_DIR", "{__lora_dir__}")
 
 sd_config = onediffusion.AutoConfig.for_model(model)
 

@@ -23,6 +23,7 @@ import typing as t
 from pathlib import Path
 
 import fs
+import fs.copy
 import inflection
 
 import bentoml
@@ -179,14 +180,12 @@ def _build_bento(
     labels = {}
     labels.update({"_type": sd.sd_type, "_framework": framework_envvar})
     logger.info("Building Bento for diffusion model '%s'", sd.config["start_name"])
+
     return bentoml.bentos.build(
         f"{service_name}:svc",
         name=bento_tag.name,
         labels=labels,
         description=f"OneDiffusion service for {sd.config['start_name']}",
-        include=list(
-            sd_fs.walk.files(filter=["*.py"])
-        ),  # NOTE: By default, we are using _service.py as the default service, for now.
         exclude=["/venv", "__pycache__/", "*.py[cod]", "*$py.class"],
         python=construct_python_options(sd, sd_fs, extra_dependencies),
         docker=construct_docker_options(sd, sd_fs, workers_per_resource),
@@ -200,6 +199,8 @@ def build(
     *,
     model_id: str | None = None,
     pipeline: str | None = None,
+    lora_weights: str | None = None,
+    lora_dir: str | None = None,
     bento_name: str | None = None,
     bento_version: str | None = None,
     _extra_dependencies: tuple[str, ...] | None = None,
@@ -267,11 +268,43 @@ def build(
                 )
                 model_version = bento_model.tag.version
 
+                lora_files_to_copy: list[str] = []
+
                 content = f.read()
                 content = content.replace(r"{__model_name__}", model_name)
                 content = content.replace(r"{__model_id__}", sd.model_id)
                 content = content.replace(r"{__pipeline__}", sd.pipeline)
+                if lora_weights:
+                    lora_path = os.path.realpath(os.path.expanduser(lora_weights))
+                    assert os.path.isfile(lora_path), "Currently OneDiffusion only support package local lora weights into bento"
+                    lora_filename = os.path.basename(lora_path)
+                    content = content.replace(r"{__lora_weights__}", lora_filename)
+                    lora_files_to_copy.append(lora_path)
+                else:
+                    content = content.replace(r"{__lora_weights__}", "")
+                if lora_weights or lora_dir:
+                    content = content.replace(r"{__lora_dir__}", "/home/bentoml/bento/src/lora")
+                else:
+                    content = content.replace(r"{__lora_dir__}", "")
                 sd_fs.writetext(target_service_name, content)
+
+                # package lora files
+                if lora_dir:
+                    lora_dir_path = os.path.realpath(os.path.expanduser(lora_dir))
+                    assert os.path.isdir(lora_dir_path), "Currently OneDiffusion only support package local lora dir into bent"
+
+                    with fs.open_fs(lora_dir_path) as lora_fs:
+                        fs.copy.copy_dir(lora_fs, "", sd_fs, "lora")
+
+                if lora_files_to_copy:
+                    sd_fs.makedir("lora", recreate=True)
+
+                    for path in lora_files_to_copy:
+                        dir_path = os.path.dirname(path)
+                        file_name = os.path.basename(path)
+                        target_path = os.path.join("lora", file_name)
+                        with fs.open_fs(dir_path) as src_fs:
+                            fs.copy.copy(src_fs, file_name, sd_fs, target_path)
 
             name = bento_name or f"{framework_envvar}-{sd.sd_type}-{sd.pipeline}"
             version = bento_version or model_version

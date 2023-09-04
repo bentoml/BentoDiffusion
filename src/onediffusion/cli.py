@@ -701,6 +701,8 @@ Available model_id(s): {sd_config['model_ids']} [default: {sd_config['default_id
                 cwd = os.getcwd()
                 lora_weights = os.path.join(cwd, lora_weights)
             start_env["ONEDIFFUSION_LORA_WEIGHTS"] = lora_weights
+        else:
+            start_env["ONEDIFFUSION_LORA_WEIGHTS"] = ""
 
         if lora_dir is None:
             lora_dir = os.getcwd()
@@ -803,6 +805,8 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
 )
 @model_id_option(click)
 @pipeline_option(click)
+@lora_weights_option(click)
+@lora_dir_option(click)
 @output_option
 @click.option(
     "--overwrite",
@@ -826,6 +830,8 @@ def build(
     model_name: str,
     model_id: str | None,
     pipeline: str | None,
+    lora_weights: str | None,
+    lora_dir: str | None,
     overwrite: bool,
     name: str,
     version: str,
@@ -856,6 +862,8 @@ def build(
         __cli__=True,
         model_id=model_id,
         pipeline=pipeline,
+        lora_weights=lora_weights,
+        lora_dir=lora_dir,
         bento_name=name,
         bento_version=version,
         _workers_per_resource=workers_per_resource,
