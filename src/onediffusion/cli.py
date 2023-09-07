@@ -59,7 +59,7 @@ from .utils import set_quiet_mode
 if t.TYPE_CHECKING:
     import torch
 
-    from bentoml._internal.models import ModelStore
+    from bentoml._internal.container import DefaultBuilder
 
     from ._types import ClickFunctionWrapper
     from ._types import F
@@ -825,6 +825,13 @@ def download_models(model_name: str, model_id: str | None, output: OutputLiteral
     default=None,
     help="Optional bento version. If not provided, the default model version will be used",
 )
+@click.option(
+    '--containerize',
+    default=False,
+    is_flag=True,
+    type=click.BOOL,
+    help="Whether to containerize the Bento after building. '--containerize' is the shortcut of 'onediffusion build && bentoml containerize'."
+)
 @workers_per_resource_option(click, build=True)
 def build(
     model_name: str,
@@ -836,6 +843,7 @@ def build(
     name: str,
     version: str,
     output: OutputLiteral,
+    containerize: bool,
     workers_per_resource: float | None,
 ):
     """Package a given models into a Bento.
@@ -893,6 +901,18 @@ def build(
         _echo(orjson.dumps(bento.info.to_dict(), option=orjson.OPT_INDENT_2).decode())
     else:
         _echo(bento.tag)
+
+    if containerize:
+        backend = t.cast('DefaultBuilder', os.environ.get('BENTOML_CONTAINERIZE_BACKEND', 'docker'))
+        try:
+            bentoml.container.health(backend)
+        except subprocess.CalledProcessError:
+            raise OneDiffusionException(f'Failed to use backend {backend}') from None
+        try:
+            bentoml.container.build(bento.tag, backend=backend, features=('grpc', 'io'))
+        except Exception as err:
+            raise OneDiffusionException(f"Exception caught while containerizing '{bento.tag!s}':\n{err}") from err
+
     return bento
 
 
