@@ -230,7 +230,7 @@ If you only have a single LoRA file to use, run the following instead:
 onediffusion build stable-diffusion-xl --lora-weights "/path/to/lorafile"
 ```
 
-Each Bento has a randomly created `BENTO_TAG` as its unique identifier. To customize it, use `--name` and `--version` options.
+Each Bento has a `BENTO_TAG` containing both the Bento name and the version. To customize it, specify `--name` and `--version` options.
 
 ```bash
 onediffusion build stable-diffusion-xl --name sdxl --version v1
