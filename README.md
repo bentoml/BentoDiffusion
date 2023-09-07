@@ -216,9 +216,39 @@ onediffusion build stable-diffusion
 onediffusion build stable-diffusion-xl
 ```
 
-To specify the model to be packaged into the Bento, use `--model-id`. Otherwise, OneDiffusion packages the default model into the Bento. If the model does not exist locally, OneDiffusion downloads the model automatically.
+To specify the model to be packaged into the Bento, use `--model-id`. Otherwise, OneDiffusion packages the default model into the Bento. If the model does not exist locally, OneDiffusion downloads the model automatically. In addition, the pipeline to use can also be specified through `--pipeline`. By default, OneDiffusion uses the `text2image` pipeline.
 
-Once your Bento is ready, you can push it to [BentoCloud](https://www.bentoml.com/cloud).
+To package LoRA weights into the Bento, use the `--lora-dir` option to specify the directory where LoRA files are stored. These files can be dynamically loaded to the model when deployed with Docker or BentoCloud to create task-specific images.
+
+```bash
+onediffusion build stable-diffusion-xl --lora-dir "/path/to/lorafiles/dir/"
+```
+
+If you only have a single LoRA file to use, run the following instead:
+
+```bash
+onediffusion build stable-diffusion-xl --lora-weights "/path/to/lorafile"
+```
+
+Each Bento has a randomly created `BENTO_TAG` as its unique identifier. To customize it, use `--name` and `--version` options.
+
+```bash
+onediffusion build stable-diffusion-xl --name sdxl --version v1
+```
+
+Once your Bento is ready, log in to [BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html) and run the following command to push the Bento.
+
+```bash
+bentoml push BENTO_TAG
+```
+
+Alternatively, create a Docker image by containerizing the Bento with the following command. You can retrieve the `BENTO_TAG` by running `bentoml list`.
+
+```bash
+bentoml containerize BENTO_TAG
+```
+
+You can then deploy the image to any Docker-compatible environments.
 
 ## Roadmap
 
