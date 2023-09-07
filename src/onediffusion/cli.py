@@ -775,7 +775,7 @@ start = functools.partial(_start, _serve_grpc=False)
 @model_id_option(click)
 @output_option
 def download_models(model_name: str, model_id: str | None, output: OutputLiteral):
-    """Setup diffusion model interactively.
+    """Setup diffusion models interactively.
 
     \b
     Note: This is useful for development and setup for fine-tune.
@@ -838,7 +838,7 @@ def build(
     output: OutputLiteral,
     workers_per_resource: float | None,
 ):
-    """Package a given models into a Bento.
+    """Package a given model into a Bento.
 
     \b
     ```bash

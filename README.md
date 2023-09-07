@@ -69,8 +69,8 @@ Options:
   -h, --help     Show this message and exit.
 
 Commands:
-  build     Package a given models into a Bento.
-  download  Setup diffusion model interactively.
+  build     Package a given model into a Bento.
+  download  Setup diffusion models interactively.
   start     Start any diffusion models as a REST server.
 ```
 
