@@ -34,6 +34,8 @@ More models (for example, ControlNet and DeepFloyd IF) will be added soon.
 
 ## Get started
 
+To quickly get started with OneDiffusion, follow the instructions below or try this tutorial in Google Colab: [Serving Stable Diffusion with OneDiffusion](https://colab.research.google.com/github/bentoml/OneDiffusion/blob/main/examples/onediffusion_demo.ipynb).
+
 ### Prerequisites
 
 You have installed Python 3.8 (or later) and `pip`.
