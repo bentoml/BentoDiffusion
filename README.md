@@ -29,8 +29,12 @@ Currently, OneDiffusion supports the following models:
 
 - Stable Diffusion v1.4, v1.5 and v2.0
 - Stable Diffusion XL v1.0
+- Stable Diffusion XL Turbo
 
 More models (for example, ControlNet and DeepFloyd IF) will be added soon.
+
+> [!NOTE]
+> If you want to deploy Stable Video Diffusion, see the project [BentoSVD](https://github.com/bentoml/BentoSVD).
 
 ## Get started
 
@@ -152,6 +156,35 @@ Similarly, visit http://0.0.0.0:3000/ or send a request via `curl` to interact w
 Example output:
 
 ![sdxl-cat](/example-images/sdxl-cat.jpeg)
+
+### Start a Stable Diffusion XL Turbo server
+
+[SDXL Turbo](https://stability.ai/news/stability-ai-sdxl-turbo) is a distilled version of SDXL 1.0 and is capable of creating images in a single step, with improved real-time text-to-image output quality and sampling fidelity.
+
+To serve SDXL Turbo locally, run:
+
+```bash
+onediffusion start stable-diffusion-xl --model-id stabilityai/sdxl-turbo
+```
+
+Visit http://0.0.0.0:3000/ or send a request via `curl` to interact with the server. Example prompt:
+
+```
+{
+  "prompt": "Create a serene landscape at sunset, with a tranquil lake reflecting the vibrant colors of the sky. Surrounding the lake are lush, green forests and distant mountains.",
+  "height": 512,
+  "width": 512,
+  "num_inference_steps": 1,
+  "guidance_scale": 0.0
+}
+```
+
+> [!NOTE]
+> SDXL Turbo can run inference with only one step, so you can set `num_inference_steps` to `1` and this is enough to generate high quality images. However, increasing the number of steps to `2`, `3` or `4` should improve image quality. In addition, make sure you set `guidance_scale` to `0.0` to disable it as the model was trained without it. See [the official release notes](https://github.com/huggingface/diffusers/releases/tag/v0.24.0) to learn more.
+
+Example output:
+
+![sdxl-turbo-output](/example-images/sdxl-turbo-output.jpeg)
 
 ### Add LoRA weights
 
