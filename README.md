@@ -179,6 +179,8 @@ Visit http://0.0.0.0:3000/ or send a request via `curl` to interact with the ser
 > [!NOTE]
 > SDXL Turbo can run inference with only one step, so you can set `num_inference_steps` to `1` and this is enough to generate high quality images. However, increasing the number of steps to `2`, `3` or `4` should improve image quality. In addition, make sure you set `guidance_scale` to `0.0` to disable it as the model was trained without it. See [the official release notes](https://github.com/huggingface/diffusers/releases/tag/v0.24.0) to learn more.
 
+Example output:
+
 ![sdxl-turbo-output](/example-images/sdxl-turbo-output.jpeg)
 
 ### Add LoRA weights
