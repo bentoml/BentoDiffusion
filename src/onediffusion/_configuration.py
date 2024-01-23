@@ -43,6 +43,7 @@ Refer to ``onediffusion.SDConfig`` docstring for more information.
 from __future__ import annotations
 
 import functools
+import inspect
 import logging
 import os
 import sys
@@ -587,21 +588,25 @@ class SDConfig:
         cls.__attrs_attrs__ = attrs
         # generate a __attrs_init__ for the subclass, since we will
         # implement a custom __init__
+        _items = dict(
+            cls=cls,
+            attrs=attrs,
+            pre_init=_has_pre_init,
+            post_init=_has_post_init,
+            frozen=False,
+            slots=True,
+            cache_hash=False,
+            base_attr_map=base_attr_map,
+            is_exc=False,
+            cls_on_setattr=None,
+            attrs_init=True,
+        )
+        _make_init_args = inspect.getfullargspec(_make_init)
+        if 'pre_init_has_args' in _make_init_args.args:
+            _items['pre_init_has_args'] = False
         cls.__attrs_init__ = codegen.add_method_dunders(
             cls,
-            _make_init(
-                cls,  # cls (the attrs-decorated class)
-                attrs,  # tuple of attr.Attribute of cls
-                _has_pre_init,  # pre_init
-                _has_post_init,  # post_init
-                False,  # frozen
-                True,  # slots
-                False,  # cache_hash
-                base_attr_map,  # base_attr_map
-                False,  # is_exc (check if it is exception)
-                None,  # cls_on_setattr (essentially attr.setters)
-                attrs_init=True,  # whether to create __attrs_init__ instead of __init__
-            ),
+            _make_init(**_items),
         )
         # __repr__ function with the updated fields.
         cls.__repr__ = codegen.add_method_dunders(cls, _make_repr(cls.__attrs_attrs__, None, cls))
