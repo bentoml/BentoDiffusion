@@ -1,0 +1,7 @@
+runners:
+  traffic:
+    timeout: 300
+
+api_server:
+  traffic:
+    timeout: 300
