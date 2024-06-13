@@ -68,7 +68,7 @@ After the Service is ready, you can deploy the application to BentoCloud for bet
 Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
 
 ```bash
-bentoml deploy .
+bentoml deploy --env HF_TOKEN=<your huggingface token> .
 ```
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
