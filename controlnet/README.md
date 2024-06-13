@@ -4,19 +4,21 @@
 
 ControlNet is a model designed to control image diffusion processes by conditioning them with additional input images, such as canny edges, user sketches, human poses, depth maps, and more. This allows for greater control over image generation by guiding the model with specific inputs, making it easier to generate targeted images.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the [SDXL model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) and [the ControlNet model](https://huggingface.co/diffusers/controlnet-canny-sdxl-1.0). See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the [SDXL model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) and [the ControlNet model](https://huggingface.co/diffusers/controlnet-canny-sdxl-1.0).
+
+See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
 
 ## Prerequisites
 
 - You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
+- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
 - (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
 
 ## Install dependencies
 
 ```bash
-git clone https://github.com/bentoml/BentoControlNet.git
-cd BentoControlNet
+git clone https://github.com/bentoml/BentoDiffusion.git
+cd BentoDiffusion/controlnet
 pip install -r requirements.txt
 ```
 

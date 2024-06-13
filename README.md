@@ -2,14 +2,16 @@
     <h1 align="center">Self-host Diffusion Models with BentoML</h1>
 </div>
 
-This is a BentoML example project, showing you how to serve and deploy open-source diffusion models using [diffusers](https://huggingface.co/docs/diffusers/en/index) by huggingface.
+This is a BentoML example project, showing you how to serve and deploy a series of diffusion models in [the Stable Diffusion (SD) family](https://huggingface.co/models?other=stable-diffusion), which is specialized in generating and manipulating images based on text prompts.
 
-See [here](https://github.com/bentoml/BentoML?tab=readme-ov-file#%EF%B8%8F-what-you-can-build-with-bentoml) for a full list of BentoML example projects.
+See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+
+The following guide uses SDXL Turbo as an example.
 
 ## Prerequisites
 
 - You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
+- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
 - If you want to test the Service locally, a Nvidia GPU with at least 12GB VRAM will boost performance significantly.
 - (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
 
@@ -78,9 +80,9 @@ Once the application is up and running on BentoCloud, you can access it via the 
 **Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
 
 
-## Different Diffusion Models
+## Choose another diffusion model
 
-Besides the SDXL Turbo model, we have examples for other models in subdirectories of this repository. Below is a list of these models and links to the example subdirectories.
+To deploy a different diffusion model, go to the corresponding subdirectories of this repository.
 
 - [ControlNet](controlnet/)
 - [Latent Consistency Model](lcm/)
