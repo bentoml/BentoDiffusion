@@ -1,0 +1,8 @@
+service: "service:LatentConsistency"
+labels:
+  owner: bentoml-team
+  project: gallery
+include:
+- "*.py"
+python:
+  requirements_txt: "./requirements.txt"

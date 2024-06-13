@@ -1,0 +1,12 @@
+service: "service.py:ControlNet"
+labels:
+  owner: bentoml-team
+  stage: demo
+include:
+  - "*.py"
+python:
+  requirements_txt: "./requirements.txt"
+docker:
+    distro: debian
+    system_packages:
+      - ffmpeg

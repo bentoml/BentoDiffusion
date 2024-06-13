@@ -1,23 +1,23 @@
 <div align="center">
-    <h1 align="center">Self-host Diffusion Models with BentoML</h1>
+    <h1 align="center">Serving SDXL Turbo with BentoML</h1>
 </div>
 
-This is a BentoML example project, showing you how to serve and deploy open-source diffusion models using [diffusers](https://huggingface.co/docs/diffusers/en/index) by huggingface.
+[Stable Diffusion XL Turbo](https://huggingface.co/stabilityai/sdxl-turbo) is a real-time text-to-image generation model utilizing a novel distillation technique called Adversarial Diffusion Distillation (ADD). This technology enables SDXL Turbo to generate images in a single step, significantly enhancing performance and reducing computational requirements without sacrificing image quality.
 
-See [here](https://github.com/bentoml/BentoML?tab=readme-ov-file#%EF%B8%8F-what-you-can-build-with-bentoml) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the SDXL Turbo model. See [here](https://github.com/bentoml/BentoML?tab=readme-ov-file#%EF%B8%8F-what-you-can-build-with-bentoml) for a full list of BentoML example projects.
 
 ## Prerequisites
 
-- You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
+- You have installed Python 3.8+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
 - You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
-- If you want to test the Service locally, a Nvidia GPU with at least 12GB VRAM will boost performance significantly.
 - (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
+- To run the Service locally, you need a Nvidia GPU with at least 12G VRAM.
 
 ## Install dependencies
 
 ```bash
-git clone https://github.com/bentoml/BentoDiffusion.git
-cd BentoDiffusion/sdxl-turbo
+git clone https://github.com/bentoml/BentoSDXLTurbo.git
+cd BentoSDXLTurbo
 pip install -r requirements.txt
 ```
 
@@ -76,15 +76,3 @@ bentoml deploy .
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
 **Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
-
-
-## Different Diffusion Models
-
-Besides the SDXL Turbo model, we have examples for other models in subdirectories of this repository. Below is a list of these models and links to the example subdirectories.
-
-- [ControlNet](controlnet/)
-- [Latent Consistency Model](lcm/)
-- [Stable Diffusion 2 with 4x upscaler](sd2upscaler/)
-- [SDXL Lightning](sdxl-lightning/)
-- [SDXL Turbo](sdxl-turbo/)
-- [Stable Video Diffusion](svd/)

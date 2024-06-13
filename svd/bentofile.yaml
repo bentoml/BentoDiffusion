@@ -1,0 +1,10 @@
+service: "service.py:StableDiffusionVideo"
+include:
+  - "*.py"
+python:
+  requirements_txt: "./requirements.txt"
+docker:
+    distro: debian
+    system_packages:
+      - ffmpeg
+      - git
