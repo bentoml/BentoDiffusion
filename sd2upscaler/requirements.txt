@@ -3,6 +3,6 @@ bentoml>=1.2.2
 diffusers==0.25.1
 pillow==10.2.0
 torch==2.1.2
-transformers==4.36.2
+transformers==4.38.0
 triton==2.1.0; sys_platform == "linux"
 xformers==0.0.23.post1
