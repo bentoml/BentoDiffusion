@@ -4,19 +4,19 @@
 
 [Latent Consistency Models (LCM)](https://huggingface.co/papers/2310.04378) introduce a method to improve how images are created, especially with models like Stable Diffusion (SD) and Stable Diffusion XL (SDXL). By integrating LCM LoRAs for SD-based models, you can significantly reduce computational timeframe within just 2 to 8 steps.
 
-This is a BentoML example project, demonstrating how to build a REST API server for SD XL using [LCM LoRAs](https://huggingface.co/blog/lcm_lora). See [here](https://github.com/bentoml/BentoML?tab=readme-ov-file#%EF%B8%8F-what-you-can-build-with-bentoml) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build a REST API server for SD XL using [LCM LoRAs](https://huggingface.co/blog/lcm_lora). See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
 
 ## Prerequisites
 
 - You have installed Python 3.8+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
+- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
 - (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
 
 ## Install dependencies
 
 ```bash
-git clone https://github.com/bentoml/BentoLCM.git
-cd BentoLCM
+git clone https://github.com/bentoml/BentoDiffusion.git
+cd BentoDiffusion/lcm
 pip install -r requirements.txt
 ```
 

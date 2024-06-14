@@ -1,17 +1,23 @@
-This project builds an image generation application using BentoML, powered by [diffusers](https://github.com/huggingface/diffusers) and [SDXL Lightning](https://huggingface.co/ByteDance/SDXL-Lightning).
+<div align="center">
+    <h1 align="center">Serving SDXL Lightning with BentoML</h1>
+</div>
+
+This is a BentoML example project, demonstrating how to build an image generation inference API server using the [SDXL-Lightning model](https://huggingface.co/ByteDance/SDXL-Lightning), a lightning-fast text-to-image generation model that is able to generate high-quality 1024px images in a few steps.
+
+See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
 
 ## Prerequisites
 
 - You have installed Python 3.8+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
+- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
 - (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
 - To run the Service locally, you need a Nvidia GPU with at least 16G VRAM.
 
 ## Install dependencies
 
 ```bash
-git clone https://github.com/bentoml/BentoSDXLLightning.git
-cd BentoSDXLLightning
+git clone https://github.com/bentoml/BentoDiffusion.git
+cd BentoDiffusion/sdxl-lightning
 pip install -r requirements.txt
 ```
 
@@ -55,11 +61,11 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
         )
 ```
 
-## Deploy to production
+## Deploy to BentoCloud
 
-After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. A configuration YAML file (`bentofile.yaml`) is used to define the build options for your application. It is used for packaging your application into a Bento. See [Bento build options](https://docs.bentoml.com/en/latest/concepts/bento.html#bento-build-options) to learn more.
+After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/1.2/bentocloud/how-tos/manage-access-token.html), then run the following command in your project directory to deploy the application to BentoCloud.
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
 
 ```bash
 bentoml deploy .
@@ -67,4 +73,4 @@ bentoml deploy .
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: Alternatively, you can use BentoML to generate a [Docker image](https://docs.bentoml.com/en/1.2/guides/containerization.html) for a custom deployment.
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
