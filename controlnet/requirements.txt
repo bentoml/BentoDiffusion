@@ -1,9 +1,7 @@
-accelerate==0.26.1
-bentoml>=1.2.2,<2
-diffusers==0.25.1
-opencv-python==4.9.0.80
-pillow==10.2.0
-torch==2.1.2
-transformers==4.36.2
-triton==2.1.0; sys_platform == "linux"
-xformers==0.0.23.post1
+accelerate==0.31.0
+bentoml>=1.2.17,<2
+diffusers==0.29.0
+opencv-python==4.10.0.84
+pillow==10.3.0
+torch==2.3.1
+transformers==4.41.2
