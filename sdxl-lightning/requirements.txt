@@ -1,7 +1,6 @@
-accelerate==0.28.0
-bentoml>=1.2.9
-diffusers==0.27.2
-pillow==10.2.0
-torch==2.2.1
-transformers==4.39.1
-xformers==0.0.25
+accelerate==0.31.0
+bentoml>=1.2.17
+diffusers==0.29.0
+pillow==10.3.0
+torch==2.3.1
+transformers==4.41.2
