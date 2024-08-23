@@ -2,7 +2,7 @@
     <h1 align="center">Self-host Diffusion Models with BentoML</h1>
 </div>
 
-This is a BentoML example project, showing you how to serve and deploy a series of diffusion models in [the Stable Diffusion (SD) family](https://huggingface.co/models?other=stable-diffusion), which is specialized in generating and manipulating images based on text prompts.
+This repository contains a series of BentoML example projects, demonstrating how to deploy different models in [the Stable Diffusion (SD) family](https://huggingface.co/models?other=stable-diffusion), which is specialized in generating and manipulating images or video clips based on text prompts.
 
 See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
 
@@ -10,16 +10,15 @@ The following guide uses SDXL Turbo as an example.
 
 ## Prerequisites
 
-- You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
-- If you want to test the Service locally, a Nvidia GPU with at least 12GB VRAM will boost performance significantly.
-- (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
+If you want to test the Service locally, we recommend you use a Nvidia GPU with at least 12GB VRAM.
 
 ## Install dependencies
 
 ```bash
 git clone https://github.com/bentoml/BentoDiffusion.git
 cd BentoDiffusion/sdxl-turbo
+
+# Recommend Python 3.11
 pip install -r requirements.txt
 ```
 
