@@ -10,15 +10,15 @@ See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full lis
 
 ## Prerequisites
 
-- You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
-- (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
+If you want to test the Service locally, we recommend you use a Nvidia GPU with at least 12GB VRAM.
 
 ## Install dependencies
 
 ```bash
 git clone https://github.com/bentoml/BentoDiffusion.git
 cd BentoDiffusion/controlnet
+
+# Recommend Python 3.11
 pip install -r requirements.txt
 ```
 

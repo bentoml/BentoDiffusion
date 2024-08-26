@@ -8,16 +8,15 @@ This is a BentoML example project, demonstrating how to build an image generatio
 
 ## Prerequisites
 
-- You have installed Python 3.8+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/latest/get-started/quickstart.html) first.
-- (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
-- To run the Service locally, you need a Nvidia GPU with at least 12G VRAM.
+To run the Service locally, we recommend you use a Nvidia GPU with at least 12G VRAM.
 
 ## Install dependencies
 
 ```bash
 git clone https://github.com/bentoml/BentoDiffusion.git
 cd BentoDiffusion/sdxl-turbo
+
+# Recommend Python 3.11
 pip install -r requirements.txt
 ```
 
