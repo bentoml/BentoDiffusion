@@ -8,6 +8,6 @@ python:
   requirements_txt: "./requirements.txt"
   lock_packages: false
 docker:
-  python_version: 3.11
+  python_version: "3.11"
 envs:
   - name: HF_TOKEN
