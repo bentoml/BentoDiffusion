@@ -5,7 +5,7 @@ from annotated_types import Le, Ge
 from typing_extensions import Annotated
 
 
-MODEL_ID = "stabilityai/stable-diffusion-3.5-large"
+MODEL_ID = "stabilityai/stable-diffusion-3.5-large-turbo"
 
 sample_prompt = "A cat holding a sign that says hello world"
 
@@ -17,7 +17,7 @@ sample_prompt = "A cat holding a sign that says hello world"
         "gpu_type": "nvidia-tesla-a100",
     },
 )
-class SD35Large:
+class SD35LargeTurbo:
     def __init__(self) -> None:
         import torch
         from diffusers import StableDiffusion3Pipeline
@@ -33,13 +33,12 @@ class SD35Large:
             self,
             prompt: str = sample_prompt,
             negative_prompt: t.Optional[str] = None,
-            num_inference_steps: Annotated[int, Ge(1), Le(50)] = 40,
-            guidance_scale: float = 4.5,
+            num_inference_steps: Annotated[int, Ge(1), Le(10)] = 4,
     ) -> Image:
         image = self.pipe(
             prompt=prompt,
             negative_prompt=negative_prompt,
             num_inference_steps=num_inference_steps,
-            guidance_scale=guidance_scale,
+            guidance_scale=0.0,
         ).images[0]
         return image

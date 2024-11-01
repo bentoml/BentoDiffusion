@@ -1,0 +1,11 @@
+service: "service:SD35LargeTurbo"
+labels:
+  owner: bentoml-team
+  project: gallery
+include:
+- "*.py"
+python:
+  requirements_txt: "./requirements.txt"
+  lock_packages: false
+envs:
+  - name: HF_TOKEN

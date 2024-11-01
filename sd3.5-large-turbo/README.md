@@ -1,24 +1,24 @@
 <div align="center">
-    <h1 align="center">Serving Stable Diffusion 3.5 Large with BentoML</h1>
+    <h1 align="center">Serving Stable Diffusion 3.5 Large Turbo with BentoML</h1>
 </div>
 
-[Stable Diffusion 3.5 Large](https://huggingface.co/stabilityai/stable-diffusion-3.5-large) is a Multimodal Diffusion Transformer (MMDiT) text-to-image model that features improved performance in image quality, typography, complex prompt understanding, and resource-efficiency.
+[Stable Diffusion 3.5 Large Turbo](https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo) is a Multimodal Diffusion Transformer (MMDiT) text-to-image model with Adversarial Diffusion Distillation (ADD) that features improved performance in image quality, typography, complex prompt understanding, and resource-efficiency, with a focus on fewer inference steps.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion 3.5 Large model. See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion 3.5 Large Turbo model. See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
 
 ## Prerequisites
 
 - You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
 - You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
-- Accept the conditions to gain access to [Stable Diffusion 3.5 Large on Hugging Face](https://huggingface.co/stabilityai/stable-diffusion-3.5-large).
+- Accept the conditions to gain access to [Stable Diffusion 3.5 Large Turbo on Hugging Face](https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo).
 - (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
-- To run the Service locally, you need a Nvidia GPU with at least 20G VRAM.
+- To run the Service locally, you need a Nvidia GPU with at least 32G VRAM.
 
 ## Install dependencies
 
 ```bash
 git clone https://github.com/bentoml/BentoDiffusion.git
-cd BentoDiffusion/sd3.5-large
+cd BentoDiffusion/sd3.5-large-turbo
 pip install -r requirements.txt
 ```
 
@@ -29,7 +29,7 @@ We have defined a BentoML Service in `service.py`. Run `bentoml serve` in you
 ```python
 $ bentoml serve .
 
-2024-01-18T18:31:49+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:SD35Large" listening on http://localhost:3000 (Press CTRL+C to quit)
+2024-01-18T18:31:49+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:SD3.5LargeTurbo" listening on http://localhost:3000 (Press CTRL+C to quit)
 Loading pipeline components...: 100%
 ```
 
@@ -44,8 +44,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "prompt": "A cat holding a sign that says hello world",
-  "num_inference_steps": 40,
-  "guidance_scale": 4.5
+  "num_inference_steps": 4
 }'
 ```
 
@@ -57,8 +56,7 @@ import bentoml
 with bentoml.SyncHTTPClient("http://localhost:3000") as client:
         result = client.txt2img(
             prompt="A cat holding a sign that says hello world",
-            num_inference_steps=40,
-            guidance_scale=4.5
+            num_inference_steps=4
         )
 ```
 
