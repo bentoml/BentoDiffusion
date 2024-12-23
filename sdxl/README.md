@@ -4,7 +4,7 @@
 
 [Stable Diffusion XL](https://huggingface.co/papers/2307.01952) is a latent diffusion model for text-to-image synthesis that shows drastically improved performance compared the previous versions of Stable Diffusion and achieves results competitive with those of black-box state-of-the-art image generators.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion XL model. See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion XL model. See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
 
 ## Prerequisites
 

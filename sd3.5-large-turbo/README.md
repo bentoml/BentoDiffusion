@@ -4,7 +4,7 @@
 
 [Stable Diffusion 3.5 Large Turbo](https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo) is a Multimodal Diffusion Transformer (MMDiT) text-to-image model with Adversarial Diffusion Distillation (ADD) that features improved performance in image quality, typography, complex prompt understanding, and resource-efficiency, with a focus on fewer inference steps.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion 3.5 Large Turbo model. See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion 3.5 Large Turbo model. See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
 
 ## Prerequisites
 

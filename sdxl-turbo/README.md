@@ -4,7 +4,7 @@
 
 [Stable Diffusion XL Turbo](https://huggingface.co/stabilityai/sdxl-turbo) is a real-time text-to-image generation model utilizing a novel distillation technique called Adversarial Diffusion Distillation (ADD). This technology enables SDXL Turbo to generate images in a single step, significantly enhancing performance and reducing computational requirements without sacrificing image quality.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the SDXL Turbo model. See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the SDXL Turbo model. See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
 
 ## Prerequisites
 
