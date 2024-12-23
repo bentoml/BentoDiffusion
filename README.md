@@ -4,7 +4,7 @@
 
 This repository contains a series of BentoML example projects, demonstrating how to deploy different models in [the Stable Diffusion (SD) family](https://huggingface.co/models?other=stable-diffusion), which is specialized in generating and manipulating images or video clips based on text prompts.
 
-See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
 
 The following guide uses SDXL Turbo as an example.
 

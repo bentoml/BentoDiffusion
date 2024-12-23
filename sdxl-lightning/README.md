@@ -4,7 +4,7 @@
 
 This is a BentoML example project, demonstrating how to build an image generation inference API server using the [SDXL-Lightning model](https://huggingface.co/ByteDance/SDXL-Lightning), a lightning-fast text-to-image generation model that is able to generate high-quality 1024px images in a few steps.
 
-See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
+See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
 
 ## Prerequisites
 
