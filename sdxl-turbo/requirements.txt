@@ -3,4 +3,4 @@ bentoml>=1.4.0
 diffusers==0.29.0
 pillow==10.3.0
 torch==2.3.1
-transformers==4.41.2
+transformers==4.48.0
