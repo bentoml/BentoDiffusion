@@ -8,21 +8,28 @@ MODEL_ID = "stabilityai/sdxl-turbo"
 
 sample_prompt = "A cinematic shot of a baby racoon wearing an intricate italian priest robe."
 
+my_image = bentoml.images.PythonImage(python_version="3.11") \
+            .requirements_file("requirements.txt")
+
 @bentoml.service(
+    image=my_image,
     traffic={"timeout": 300},
     workers=1,
+    labels={'owner': 'bentoml-team', 'project': 'gallery'},
     resources={
         "gpu": 1,
         "gpu_type": "nvidia-l4",
     },
 )
 class SDXLTurbo:
+    model_path = bentoml.models.HuggingFaceModel(MODEL_ID)
+    
     def __init__(self) -> None:
         from diffusers import AutoPipelineForText2Image
         import torch
 
         self.pipe = AutoPipelineForText2Image.from_pretrained(
-            MODEL_ID,
+            self.model_path,
             torch_dtype=torch.float16,
             variant="fp16",
         )
