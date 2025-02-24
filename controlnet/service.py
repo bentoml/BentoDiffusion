@@ -12,15 +12,26 @@ CONTROLNET_MODEL_ID = "diffusers/controlnet-canny-sdxl-1.0"
 VAE_MODEL_ID = "madebyollin/sdxl-vae-fp16-fix"
 BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 
+
+my_image = bentoml.images.PythonImage(python_version='3.11', distro='debian') \
+            .system_packages("ffmpeg") \
+            .requirements_file("requirements.txt")
+
+
 @bentoml.service(
+    image=my_image,
     traffic={"timeout": 600},
     workers=1,
+    labels={'owner': 'bentoml-team', 'project': 'gallery'},
     resources={
         "gpu": 1,
         "gpu_type": "nvidia-l4",
     }
 )
 class ControlNet:
+    controlnet_path = bentoml.models.HuggingFaceModel(CONTROLNET_MODEL_ID)
+    vae_path = bentoml.models.HuggingFaceModel(VAE_MODEL_ID)
+    base_path = bentoml.models.HuggingFaceModel(BASE_MODEL_ID)
 
     def __init__(self) -> None:
 
@@ -35,17 +46,17 @@ class ControlNet:
             self.dtype = torch.float32
 
         self.controlnet = ControlNetModel.from_pretrained(
-            CONTROLNET_MODEL_ID,
+            self.controlnet_path,
             torch_dtype=self.dtype,
         )
 
         self.vae = AutoencoderKL.from_pretrained(
-            VAE_MODEL_ID,
+            self.vae_path,
             torch_dtype=self.dtype,
         )
 
         self.pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
-            BASE_MODEL_ID,
+            self.base_path,
             controlnet=self.controlnet,
             vae=self.vae,
             torch_dtype=self.dtype
