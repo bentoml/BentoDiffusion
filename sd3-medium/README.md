@@ -20,7 +20,7 @@ cd BentoDiffusion/sd3-medium
 # Recommend Python 3.11
 pip install -r requirements.txt
 
-export HF_TOEKN=<your-api-key>
+export HF_TOKEN=<your-api-key>
 ```
 
 ## Run the BentoML Service
