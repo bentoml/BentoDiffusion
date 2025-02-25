@@ -20,6 +20,8 @@ This is a BentoML example project, demonstrating how to build an image generatio
 git clone https://github.com/bentoml/BentoDiffusion.git
 cd BentoDiffusion/sd3.5-large
 pip install -r requirements.txt
+
+export HF_TOKEN=<your-api-key>
 ```
 
 ## Run the BentoML Service
