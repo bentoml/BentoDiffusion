@@ -18,6 +18,8 @@ cd BentoDiffusion/sdxl-turbo
 
 # Recommend Python 3.11
 pip install -r requirements.txt
+
+export HF_TOKEN=<your-api-key>
 ```
 
 ## Run the BentoML Service
