@@ -8,11 +8,8 @@ This is a BentoML example project, demonstrating how to build an image generatio
 
 ## Prerequisites
 
-- You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
-- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
 - Accept the conditions to gain access to [Stable Diffusion 3.5 Large on Hugging Face](https://huggingface.co/stabilityai/stable-diffusion-3.5-large).
-- (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
-- To run the Service locally, you need a Nvidia GPU with at least 20G VRAM.
+- To run the Service locally, you need an Nvidia GPU with at least 20G VRAM.
 
 ## Install dependencies
 
@@ -29,7 +26,7 @@ export HF_TOKEN=<your-api-key>
 We have defined a BentoML Service in `service.py`. Run `bentoml serve` in your project directory to start the Service.
 
 ```python
-$ bentoml serve .
+$ bentoml serve
 
 2024-01-18T18:31:49+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:SD35Large" listening on http://localhost:3000 (Press CTRL+C to quit)
 Loading pipeline components...: 100%
@@ -68,12 +65,20 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
 
 After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
 
 ```bash
-bentoml deploy --env HF_TOKEN=<your huggingface token> .
+bentoml cloud login
+```
+
+Create a BentoCloud secret to store the required environment variable and reference it for deployment.
+
+```bash
+bentoml secret create huggingface HF_TOKEN=$HF_TOKEN
+
+bentoml deploy --secret huggingface
 ```
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).

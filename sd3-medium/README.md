@@ -9,7 +9,7 @@ This is a BentoML example project, demonstrating how to build an image generatio
 ## Prerequisites
 
 - Accept the conditions to gain access to [Stable Diffusion 3 Medium on Hugging Face](https://huggingface.co/stabilityai/stable-diffusion-3-medium).
-- To run the Service locally, we recommend you use a Nvidia GPU with at least 20G VRAM.
+- To run the Service locally, we recommend you use an Nvidia GPU with at least 20G VRAM.
 
 ## Install dependencies
 
@@ -67,7 +67,7 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
 
 After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html).
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
 
 ```bash
 bentoml cloud login
@@ -78,9 +78,9 @@ Create a BentoCloud secret to store the required environment variable and refere
 ```bash
 bentoml secret create huggingface HF_TOKEN=$HF_TOKEN
 
-bentoml deploy . --secret huggingface
+bentoml deploy --secret huggingface
 ```
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).
