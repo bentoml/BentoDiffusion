@@ -8,7 +8,7 @@ This is a BentoML example project, demonstrating how to build an image generatio
 
 ## Prerequisites
 
-To run the Service locally, we recommend you use a Nvidia GPU with at least 12G VRAM.
+To run the Service locally, we recommend you use an Nvidia GPU with at least 12G VRAM.
 
 ## Install dependencies
 
@@ -18,16 +18,14 @@ cd BentoDiffusion/sdxl-turbo
 
 # Recommend Python 3.11
 pip install -r requirements.txt
-
-export HF_TOKEN=<your-api-key>
 ```
 
 ## Run the BentoML Service
 
 We have defined a BentoML Service in `service.py`. Run `bentoml serve` in your project directory to start the Service.
 
-```python
-$ bentoml serve .
+```bash
+$ bentoml serve
 
 2024-01-18T18:31:49+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:SDXLTurboService" listening on http://localhost:3000 (Press CTRL+C to quit)
 Loading pipeline components...: 100%
@@ -68,12 +66,18 @@ For detailed explanations of the Service code, see [Stable Diffusion XL Turbo](h
 
 After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
 
 ```bash
-bentoml deploy .
+bentoml cloud login
+```
+
+Deploy it to BentoCloud.
+
+```bash
+bentoml deploy
 ```
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).

@@ -10,7 +10,7 @@ See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full
 
 ## Prerequisites
 
-If you want to test the Service locally, we recommend you use a Nvidia GPU with at least 12GB VRAM.
+If you want to test the Service locally, we recommend you use an Nvidia GPU with at least 12GB VRAM.
 
 ## Install dependencies
 
@@ -26,8 +26,8 @@ pip install -r requirements.txt
 
 We have defined a BentoML Service in `service.py`. Run `bentoml serve` in your project directory to start the Service.
 
-```python
-$ bentoml serve .
+```bash
+$ bentoml serve
 
 2024-01-18T09:43:40+0800 [INFO] [cli] Prometheus metrics for HTTP BentoServer from "service:APIService" can be accessed at http://localhost:3000/metrics.
 2024-01-18T09:43:41+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:APIService" listening on http://localhost:3000 (Press CTRL+C to quit)
@@ -65,18 +65,24 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
     )
 ```
 
-For detailed explanations of the Service code, see [ControlNet](https://docs.bentoml.org/en/latest/use-cases/diffusion-models/controlnet.html).
+For detailed explanations of the Service code, see [ControlNet](https://docs.bentoml.com/en/latest/examples/controlnet.html).
 
 ## Deploy to BentoCloud
 
 After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
 
 ```bash
-bentoml deploy .
+bentoml cloud login
+```
+
+Deploy it to BentoCloud.
+
+```bash
+bentoml deploy
 ```
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).

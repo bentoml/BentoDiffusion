@@ -10,7 +10,7 @@ The following guide uses SDXL Turbo as an example.
 
 ## Prerequisites
 
-If you want to test the Service locally, we recommend you use a Nvidia GPU with at least 12GB VRAM.
+If you want to test the Service locally, we recommend you use an Nvidia GPU with at least 12GB VRAM.
 
 ## Install dependencies
 
@@ -26,8 +26,8 @@ pip install -r requirements.txt
 
 We have defined a BentoML Service in `service.py`. Run `bentoml serve` in your project directory to start the Service.
 
-```python
-$ bentoml serve .
+```bash
+$ bentoml serve
 
 2024-01-18T18:31:49+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:SDXLTurboService" listening on http://localhost:3000 (Press CTRL+C to quit)
 Loading pipeline components...: 100%
@@ -68,24 +68,31 @@ For detailed explanations of the Service code, see [Stable Diffusion XL Turbo](h
 
 After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
 
 ```bash
-bentoml deploy .
+bentoml cloud login
+```
+
+Deploy it to BentoCloud.
+
+```bash
+bentoml deploy
 ```
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).
 
 
 ## Choose another diffusion model
 
 To deploy a different diffusion model, go to the corresponding subdirectories of this repository.
 
+- [FLUX.1](flux-timestep-distilled/)
+- [Stable Diffusion 3 Medium](sd3-medium/)
+- [Stable Diffusion 3.5 Large Turbo](sd3.5-large-turbo/)
+- [Stable Diffusion 3.5 Large](sd3.5-large/)
+- [Stable Diffusion XL Lightning](sdxl-lightning/)
+- [Stable Diffusion XL Turbo](sdxl-turbo/)
 - [ControlNet](controlnet/)
-- [Latent Consistency Model](lcm/)
-- [Stable Diffusion 2 with 4x upscaler](sd2upscaler/)
-- [SDXL Lightning](sdxl-lightning/)
-- [SDXL Turbo](sdxl-turbo/)
-- [Stable Video Diffusion](svd/)
