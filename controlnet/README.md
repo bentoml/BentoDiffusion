@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 We have defined a BentoML Service in `service.py`. Run `bentoml serve` in your project directory to start the Service.
 
-```python
+```bash
 $ bentoml serve
 
 2024-01-18T09:43:40+0800 [INFO] [cli] Prometheus metrics for HTTP BentoServer from "service:APIService" can be accessed at http://localhost:3000/metrics.
