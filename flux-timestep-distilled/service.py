@@ -1,43 +1,32 @@
+from __future__ import annotations
+
 import bentoml
 from PIL.Image import Image
-from annotated_types import Le, Ge
-from typing_extensions import Annotated
 
 MODEL_ID = "black-forest-labs/FLUX.1-schnell"
 
 sample_prompt = "A girl smiling"
 
-runtime_image = bentoml.images.PythonImage(
-    python_version="3.11",
-).requirements_file("requirements.txt")
-
 
 @bentoml.service(
     name="bento-flux-timestep-distilled-service",
-    image=runtime_image,
+    image=bentoml.images.Image(python_version="3.11").requirements_file("requirements.txt"),
     traffic={"timeout": 300},
-    workers=1,
-    resources={
-        "gpu": 1,
-        "gpu_type": "nvidia-tesla-a100",
-    },
+    envs=[{"name": "HF_TOKEN"}],
+    resources={"gpu": 1, "gpu_type": "nvidia-a100-80gb"},
 )
 class FluxTimestepDistilled:
-
-    hf_model = bentoml.models.HuggingFaceModel(MODEL_ID)
-
-    def __init__(self) -> None:
+    @bentoml.on_startup
+    def setup_pipeline(self) -> None:
         import torch
         from diffusers import FluxPipeline
-        from huggingface_hub import hf_hub_download
-        from safetensors.torch import load_file
 
         self.pipe = FluxPipeline.from_pretrained(
-            self.hf_model,
+            MODEL_ID,
             torch_dtype=torch.bfloat16,
+            use_safetensors=True,
         )
-        self.pipe.enable_model_cpu_offload()
-
+        self.pipe.to("cuda")
 
     @bentoml.api
     def txt2img(self, prompt: str = sample_prompt) -> Image:

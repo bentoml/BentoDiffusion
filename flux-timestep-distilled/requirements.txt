@@ -1,8 +1,8 @@
-accelerate==1.5.2
-bentoml>=1.4.3
-diffusers==0.32.2
-pillow==11.1.0
+accelerate==1.6.0
+bentoml==1.4.11
+diffusers==0.33.1
+pillow==11.2.1
 protobuf==6.30.1
 sentencepiece==0.2.0
 torch==2.6.0
-transformers==4.49.0
+transformers==4.51.0
