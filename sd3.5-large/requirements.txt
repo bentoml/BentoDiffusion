@@ -1,5 +1,5 @@
 accelerate==1.0.1
-bentoml>=1.4.0
+bentoml==1.4.11
 diffusers==0.31.0
 pillow==11.0.0
 protobuf==5.28.3

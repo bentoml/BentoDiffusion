@@ -1,5 +1,5 @@
 accelerate==0.31.0
-bentoml>=1.4.0
+bentoml==1.4.11
 diffusers==0.29.0
 opencv-python==4.10.0.84
 pillow==10.3.0

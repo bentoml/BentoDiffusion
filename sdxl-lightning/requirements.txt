@@ -1,5 +1,5 @@
 accelerate==0.31.0
-bentoml>=1.4.0
+bentoml==1.4.11
 diffusers==0.29.0
 pillow==10.3.0
 torch==2.6.0
