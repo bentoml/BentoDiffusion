@@ -4,5 +4,5 @@ diffusers==0.31.0
 pillow==11.0.0
 protobuf==5.28.3
 sentencepiece==0.2.0
-torch==2.4.1
+torch==2.6.0
 transformers==4.48.0
