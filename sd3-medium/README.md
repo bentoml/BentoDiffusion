@@ -4,7 +4,7 @@
 
 [Stable Diffusion 3 Medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium) is a Multimodal Diffusion Transformer (MMDiT) text-to-image model that features greatly improved performance in image quality, typography, complex prompt understanding, and resource-efficiency.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion 3 Medium model. See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the Stable Diffusion 3 Medium model.
 
 ## Prerequisites
 
@@ -63,24 +63,4 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
         )
 ```
 
-## Deploy to BentoCloud
-
-After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
-
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
-
-```bash
-bentoml cloud login
-```
-
-Create a BentoCloud secret to store the required environment variable and reference it for deployment.
-
-```bash
-bentoml secret create huggingface HF_TOKEN=$HF_TOKEN
-
-bentoml deploy --secret huggingface
-```
-
-Once the application is up and running on BentoCloud, you can access it via the exposed URL.
-
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).
+For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).

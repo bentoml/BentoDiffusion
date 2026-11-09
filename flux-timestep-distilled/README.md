@@ -4,8 +4,6 @@
 
 This is a BentoML example project, demonstrating how to build an image generation inference API server using the [FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell), a 12 billion parameter rectified flow transformer capable of generating images from text descriptions.
 
-See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
-
 ## Prerequisites
 
 To run the Service locally, we recommend you use an Nvidia GPU with at least 32G VRAM.
@@ -56,22 +54,4 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
         )
 ```
 
-## Deploy to BentoCloud
-
-After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
-
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
-
-```bash
-bentoml cloud login
-```
-
-Deploy it to BentoCloud.
-
-```bash
-bentoml deploy
-```
-
-Once the application is up and running on BentoCloud, you can access it via the exposed URL.
-
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).
+For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).

@@ -4,8 +4,6 @@
 
 This repository contains a series of BentoML example projects, demonstrating how to deploy different models in [the Stable Diffusion (SD) family](https://huggingface.co/models?other=stable-diffusion), which is specialized in generating and manipulating images or video clips based on text prompts.
 
-See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
-
 The following guide uses SDXL Turbo as an example.
 
 ## Prerequisites
@@ -62,28 +60,7 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
         )
 ```
 
-For detailed explanations of the Service code, see [Stable Diffusion XL Turbo](https://docs.bentoml.com/en/latest/use-cases/diffusion-models/sdxl-turbo.html).
-
-## Deploy to BentoCloud
-
-After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
-
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
-
-```bash
-bentoml cloud login
-```
-
-Deploy it to BentoCloud.
-
-```bash
-bentoml deploy
-```
-
-Once the application is up and running on BentoCloud, you can access it via the exposed URL.
-
-**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).
-
+For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/get-started/packaging-for-deployment.html).
 
 ## Choose another diffusion model
 
